@@ -1,0 +1,23 @@
+<!DOCTYPE RCC>
+<RCC>
+  <qresource prefix="/icons">
+    <file>images/circleTool.svg</file>
+    <file>images/copyEdit.svg</file>
+    <file>images/cutEdit.svg</file>
+    <file>images/hexagon.svg</file>
+    <file>images/lineTool.svg</file>
+    <file>images/newFile.svg</file>
+    <file>images/openFile.svg</file>
+    <file>images/pasteEdit.svg</file>
+    <file>images/penTool.svg</file>
+    <file>images/redoEdit.svg</file>
+    <file>images/roundedRectangleTool.svg</file>
+    <file>images/saveAsFile.svg</file>
+    <file>images/saveFile.svg</file>
+    <file>images/selectTool.svg</file>
+    <file>images/textTool.svg</file>
+    <file>images/undoEdit.svg</file>
+    <file>images/rectTool.svg</file>
+    <file>images/deleteEdit.svg</file>
+  </qresource>
+</RCC>
