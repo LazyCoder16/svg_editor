@@ -10,6 +10,7 @@
 #include <QAbstractGraphicsShapeItem>
 #include <QGraphicsRectItem>
 #include <set>
+#include <vector>
 
 
 class GraphicScene : public QGraphicsScene
@@ -17,18 +18,22 @@ class GraphicScene : public QGraphicsScene
     Q_OBJECT
 public:
     explicit GraphicScene(QWidget* parent = nullptr);
+    void addAction(std::unique_ptr<Command> command) { undoStack.addAction(std::move(command)); }
+    void addShape(std::unique_ptr<QAbstractGraphicsShapeItem> shape);
+    // Helpers for undo and redo of delete operation
+    void deleteShape(QAbstractGraphicsShapeItem* shape);
+    void addDeletedShape(QAbstractGraphicsShapeItem* shape);
 
 signals:
     void centreCanvasOn(float x, float y);
+    void selectedShapesChanged(std::vector<QAbstractGraphicsShapeItem*> selectedShapes);
 
 public slots:
     void setViewportRect(float w, float h);
-    void addShape(QAbstractGraphicsShapeItem* shape);
     void setToolType(ToolType tool);
-    void deleteShape(QAbstractGraphicsShapeItem* shape);
-    void addDeletedShape(QAbstractGraphicsShapeItem* shape);
     void deleteSelectedItem();
     void removeAllItems();
+    // So that other objects can access the undo stack object of the scene
     void undo() { undoStack.undo(); }
     void redo() { undoStack.redo(); }
 
@@ -44,8 +49,8 @@ private:
     std::map<QAbstractGraphicsShapeItem*, std::unique_ptr<QAbstractGraphicsShapeItem> > deletedShapes; 
     ToolType curTool;
     bool drawShapeStarted = false;
+    bool dragStarted = false;
     QPointF startDrawPoint;
+    QPointF startDragPos;
     UndoStack undoStack;
 };
-
-

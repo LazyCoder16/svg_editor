@@ -5,11 +5,8 @@
 AddDeleteShapeCommand::AddDeleteShapeCommand(std::vector<QAbstractGraphicsShapeItem*> items, GraphicScene *scene, bool added)
     : items(items), scene(scene), added(added)
 {
-    if(added)
-    {
-        for(auto item : items) scene->addShape(item);
-    }
-    else 
+    // Shape add command is called by the scene before initializing this command as the scene owns the shape
+    if(!added) 
     {
         for(auto item: items) scene->deleteShape(item);
     }

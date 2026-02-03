@@ -3,6 +3,8 @@
 
 
 #include <QAbstractGraphicsShapeItem>
+#include <QtWidgets/qgraphicsitem.h>
+#include <vector>
 class GraphicScene; // Forward declaration to solve cyclic includes
 
 /*
@@ -21,7 +23,7 @@ public:
 };
 
 /*
-Command for drawing a new shape
+Command for drawing/deleting a shape
 */
 class AddDeleteShapeCommand : public Command
 {  
@@ -34,6 +36,22 @@ private:
     std::vector<QAbstractGraphicsShapeItem*> items;
     GraphicScene *scene;
     bool added;
+};
+
+/*
+Command for moving a shape
+*/
+class MoveShapeCommand : public Command
+{
+public:
+    MoveShapeCommand(QGraphicsItem* item, QPointF startPos, QPointF endPos);
+    void undo() override;
+    void redo() override;
+
+private:
+    QGraphicsItem* item;
+    QPointF startPos;
+    QPointF endPos;
 };
 
 #endif // COMMAND_H

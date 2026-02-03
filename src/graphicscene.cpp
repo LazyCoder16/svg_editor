@@ -9,10 +9,12 @@
 #include <QtCore/qpoint.h>
 #include <QtGui/qbrush.h>
 #include <QtGui/qpainterpath.h>
+#include <QtGui/qtransform.h>
 #include <QtWidgets/qgraphicsitem.h>
 #include <QGraphicsSceneDragDropEvent>
 #include <QtWidgets/qgraphicsscene.h>
 #include <QtWidgets/qgraphicssceneevent.h>
+#include <algorithm>
 #include <iostream>
 #include <QGraphicsSceneMouseEvent>
 #include <memory>
@@ -25,23 +27,32 @@ GraphicScene::GraphicScene(QWidget* parent)
     this->setSceneRect(-2500, -1000, 5000, 2000);
     viewportRect = this->addRect(0, 0, 128, 128, QPen(), QBrush(Qt::white));
     emit centreCanvasOn(viewportRect->rect().width()/2, viewportRect->rect().height()/2);
+    // Let other objects track for a selection change
+    connect(this, &GraphicScene::selectionChanged, this, [=]() {
+        auto selectedItems = this->selectedItems();
+        std::vector<QAbstractGraphicsShapeItem*> selectedShapes;
+        for(auto item : selectedItems)
+        {
+            selectedShapes.push_back(static_cast<QAbstractGraphicsShapeItem*>(item));
+        }
+        emit selectedShapesChanged(selectedShapes);
+    });
 }
 
 
-/*
-Implementation of slots
-*/
 void GraphicScene::setViewportRect(float w, float h)
 {
     this->viewportRect->setRect(0, 0, w, h);
     emit centreCanvasOn(w/2, h/2);
 }
 
-void GraphicScene::addShape(QAbstractGraphicsShapeItem* shape)
+void GraphicScene::addShape(std::unique_ptr<QAbstractGraphicsShapeItem> shape)
 {
     // Add a brand new shape to our scene
-    this->addItem(shape);
-    shapes.insert(shape);
+    // Argument is a unique_ptr as we dont want raw point not owned by anyone for memory safety
+    // The scene takes ownership of this unique_ptr with the addItem function
+    shapes.insert(shape.get());
+    this->addItem(shape.release());
 }
 
 void GraphicScene::setToolType(ToolType tool)
@@ -61,6 +72,7 @@ void GraphicScene::deleteShape(QAbstractGraphicsShapeItem* shape)
     if(shapes.find(shape) != shapes.end())
     {
         shape->setFlag(QGraphicsItem::ItemIsSelectable, false);
+        shape->setFlag(QGraphicsItem::ItemIsMovable, false);
         auto ushape = std::unique_ptr<QAbstractGraphicsShapeItem>(shape); // Scene is leaving the pointer's ownership
         this->removeItem(shape);
         shapes.erase(shape);
@@ -73,6 +85,11 @@ void GraphicScene::addDeletedShape(QAbstractGraphicsShapeItem* shape)
     // Add a removed shape back into the canvas
     if(deletedShapes.find(shape) != deletedShapes.end())
     {
+        if(curTool == ToolType::Select)
+        {
+            shape->setFlag(QGraphicsItem::ItemIsSelectable, true);
+            shape->setFlag(QGraphicsItem::ItemIsMovable, true);
+        }
         this->addItem(deletedShapes[shape].release()); // We can safely pass it back to the scene
         deletedShapes.erase(shape); // Delete on null unique_ptr is safe
         shapes.insert(shape);
@@ -86,6 +103,7 @@ void GraphicScene::deleteSelectedItem()
     {
         shapes.push_back(static_cast<QAbstractGraphicsShapeItem*>(item));
     }
+    // Calls the deleteShape() function in its constructor
     undoStack.addAction(std::make_unique<AddDeleteShapeCommand>(
         shapes, this, false
     ));
@@ -108,29 +126,46 @@ Mouse events from drawing new shape
 */
 void GraphicScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-    if(event->button() == Qt::LeftButton && curTool != ToolType::Select && curTool != ToolType::Text) {
+    // Make a new unique_ptr and give its ownership to the scene after creating it
+    // ghostItem pointer will store the object location
+    std::unique_ptr<QAbstractGraphicsShapeItem> ghostGuard;
+    if(event->button() == Qt::LeftButton && curTool != ToolType::Select) {
+        startDrawPoint = event->scenePos();
         for(const auto shape : shapes)
         {
             shape->setFlag(QGraphicsItem::ItemIsSelectable, false);
         }
-        startDrawPoint = event->scenePos();
         this->drawShapeStarted = true;
         if(curTool == ToolType::Rectangle) {
-            ghostItem = new Rectangle(startDrawPoint.x(), startDrawPoint.y(), 0, 0);
+            ghostGuard = std::make_unique<Rectangle>(startDrawPoint.x(), startDrawPoint.y(), 0, 0);
         }
         else if(curTool == ToolType::Circle) {
-            ghostItem = new Circle(startDrawPoint.x(), startDrawPoint.y(), 0);
+            ghostGuard = std::make_unique<Circle>(startDrawPoint.x(), startDrawPoint.y(), 0);
         }
         else if(curTool == ToolType::Hexagon) {
-            ghostItem = new Polygon(std::vector<QPointF> {});
+            ghostGuard = std::make_unique<Polygon>(std::vector<QPointF> {});
         }
         else if(curTool == ToolType::Line) {
-            ghostItem = new Line(startDrawPoint.x(), startDrawPoint.y(), startDrawPoint.x(), startDrawPoint.y());
+            ghostGuard = std::make_unique<Line>(startDrawPoint.x(), startDrawPoint.y(), startDrawPoint.x(), startDrawPoint.y());
         }
         else if(curTool == ToolType::Freehand) {
-            ghostItem = new FreehandPath(QPainterPath(startDrawPoint));
+            ghostGuard = std::make_unique<FreehandPath>(QPainterPath(startDrawPoint));
         }
-        this->addItem(ghostItem); // Scene owns the item now
+        else if(curTool == ToolType::Text) {
+            ghostGuard = std::make_unique<Rectangle>(startDrawPoint.x(), startDrawPoint.y(), 0, 0);
+            ghostGuard->setPen(QPen(Qt::PenStyle::DotLine));
+        }
+        ghostItem = ghostGuard.get();
+        this->addItem(ghostGuard.release()); // Scene owns the item now
+    }
+    if(event->button() == Qt::LeftButton && curTool == ToolType::Select)
+    {
+        QGraphicsItem* item = this->itemAt(event->scenePos(), QTransform());
+        if(item) 
+        {
+            this->startDragPos = item->pos();
+            this->dragStarted = true;
+        }
     }
     QGraphicsScene::mousePressEvent(event);
 }
@@ -147,6 +182,18 @@ void GraphicScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 void GraphicScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
     if(event->button() == Qt::LeftButton && curTool != ToolType::Select && drawShapeStarted) {
+        if(curTool == ToolType::Text)
+        {
+            // Edge case of text; our ghostItem is a Rectangle*. We safely remove it from the scene
+            // and swap it for a new TextShape* whose ownership is safely transferred to the scene
+            auto topLeft = ghostItem->boundingRect().topLeft();
+            auto textShape = std::make_unique<TextShape>(topLeft.x(), topLeft.y(), "Edit Text");
+            this->removeItem(ghostItem);
+            delete ghostItem;
+            ghostItem = textShape.get();
+            this->addItem(textShape.release());
+        }
+        this->shapes.insert(ghostItem);
         undoStack.addAction(std::make_unique<AddDeleteShapeCommand>(
             std::vector<QAbstractGraphicsShapeItem*>{ghostItem}, this, true
         ));
@@ -154,6 +201,15 @@ void GraphicScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         ghostItem->setFlag(QGraphicsItem::ItemIsSelectable, true);
         ghostItem->setSelected(true);
         ghostItem = nullptr;
+    }
+    else if(event->button() == Qt::LeftButton && curTool == ToolType::Select && dragStarted) {
+        QGraphicsItem* item = this->itemAt(event->scenePos(), QTransform());
+        if(item && item->pos() != startDragPos) {
+            undoStack.addAction(std::make_unique<MoveShapeCommand>(
+                item, startDragPos, item->pos()
+            ));
+        }
+        dragStarted = false;
     }
     QGraphicsScene::mouseReleaseEvent(event);
 }

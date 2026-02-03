@@ -1,5 +1,6 @@
 #include "doccontroller.h"
 #include <QAbstractGraphicsShapeItem>
+#include "graphicscene.h"
 #include "xmlparser.h"
 #include <QDebug>
 #include <QGraphicsItem>
@@ -12,6 +13,11 @@
 DocController::DocController(QObject *parent)
     : QObject{parent}
 {}
+
+void DocController::setScene(GraphicScene* scene)
+{
+    this->scene = scene;
+}
 
 void extract_shapes(const XMLTag& root, std::vector<std::unique_ptr<QAbstractGraphicsShapeItem> >& shapes)
 {
@@ -46,16 +52,17 @@ void DocController::load_file(const QString& filename, const QString &content)
     std::cout << root << "\n";
     this->filename = filename.toStdString();
 
-    emit clearScene();
+    scene->removeAllItems();
     if(root.properties.find("width") != root.properties.end() 
         && root.properties.find("height") != root.properties.end())
     {
-        emit setViewportRect(std::stof(root.properties.at("width")), std::stof(root.properties.at("height")));
+        scene->setViewportRect(std::stof(root.properties.at("width")), std::stof(root.properties.at("height")));
     }
     std::vector<std::unique_ptr<QAbstractGraphicsShapeItem> > shapes;
     extract_shapes(root, shapes);
     for(int i=0; i<shapes.size(); ++i) 
     {
-        emit addShape(shapes[i].release());
+        // Transfer ownership of the created shapes to our scene
+        scene->addShape(std::move(shapes[i]));
     }
 }

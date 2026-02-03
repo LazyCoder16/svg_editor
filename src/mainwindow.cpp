@@ -20,6 +20,7 @@ MainWindow::MainWindow(QWidget *parent)
     scene = new GraphicScene(this);
     docController = new DocController(this);
     ui->graphicsView->setScene(scene);
+    docController->setScene(scene); // Let docController access the scene too
 
     /*// Setup menu item button click signals to action slots
     connect(ui->menuButtons->ui->pushButton_New, SIGNAL(clicked()), ui->actionNew, SLOT(trigger()));
@@ -36,7 +37,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionDelete_Selection, &QAction::triggered, scene, &GraphicScene::deleteSelectedItem);
     connect(ui->menuButtons->ui->pushButton_Delete, &QPushButton::clicked, ui->actionDelete_Selection, &QAction::trigger);
     // Open File Action
-    connect(docController, &DocController::clearScene, scene, &GraphicScene::removeAllItems);
     connect(ui->menuButtons, &MenuButtonsWidget::file_loaded, docController, &DocController::load_file);
     connect(ui->actionOpen, &QAction::triggered, ui->menuButtons->ui->pushButton_Open, &QPushButton::click);
     // Undo Action
@@ -47,8 +47,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->menuButtons->ui->pushButton_Redo, &QPushButton::clicked, ui->actionRedo, &QAction::trigger);
 
     connect(scene, &GraphicScene::centreCanvasOn, ui->graphicsView, &CanvasWidget::centreOn);
-    connect(docController, &DocController::setViewportRect, scene, &GraphicScene::setViewportRect);
-    connect(docController, &DocController::addShape, scene, &GraphicScene::addShape);
 
     connect(ui->menuButtons, &MenuButtonsWidget::buttonClicked, this, &MainWindow::buttonClicked);
     connect(ui->graphicsView, &CanvasWidget::mousePosition, this, &MainWindow::setMousePosition);
@@ -72,16 +70,3 @@ void MainWindow::setMousePosition(int x, int y)
 {
     ui->label->setText(QString("X: %1,   Y: %2").arg(x).arg(y));
 }
-
-/*
-void MainWindow::on_actionNew_triggered()
-{
-    ui->label->setText("New is triggered!!!!");
-}
-
-
-void MainWindow::on_actionSave_triggered()
-{
-    ui->label->setText("Save is triggered!!!!");
-}
-*/
