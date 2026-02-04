@@ -2,6 +2,7 @@
 #include "canvaswidget.h"
 #include "doccontroller.h"
 #include "graphicscene.h"
+#include "propertiesdock.h"
 #include "toolbarwidget.h"
 #include "ui_mainwindow.h"
 #include <QtCore/qobjectdefs.h>
@@ -17,10 +18,12 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    this->setWindowTitle("New Document");
     scene = new GraphicScene(this);
     docController = new DocController(this);
     ui->graphicsView->setScene(scene);
     docController->setScene(scene); // Let docController access the scene too
+    ui->dockWidget->setScene(scene);
 
     /*// Setup menu item button click signals to action slots
     connect(ui->menuButtons->ui->pushButton_New, SIGNAL(clicked()), ui->actionNew, SLOT(trigger()));
@@ -53,6 +56,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->menuButtons, &MenuButtonsWidget::file_loaded, docController, &DocController::load_file);
     connect(ui->toolbarWidget, &ToolBarWidget::toolChanged, scene, &GraphicScene::setToolType);
+
+    connect(scene, &GraphicScene::selectedShapesChanged, ui->dockWidget, &PropertiesDock::setSelectedShapes);
+    connect(docController, &DocController::setWindowTitle, this, [=](const QString& title) {
+        this->setWindowTitle(title);
+    });
 }
 
 MainWindow::~MainWindow()

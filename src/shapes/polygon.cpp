@@ -10,6 +10,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <sstream>
 
 
 std::vector<std::string> split(const std::string& s, char del)
@@ -52,23 +53,29 @@ Polygon::Polygon(const std::vector<QPointF>& points)
 Polygon::Polygon(const XMLTag& xml)
     : QGraphicsPolygonItem()
 {
+    this->updateFromXML(xml);
+    this->setFlags(QGraphicsItem::ItemSendsGeometryChanges);
+}
+
+void Polygon::updateFromXML(const XMLTag& xml)
+{
     std::vector<QPointF> points;
-    const auto& v = split(xml.properties.at("points"), ' ');
-    for(const std::string& s : v)
+    std::stringstream ss(xml.properties.at("points"));
+    std::string s;
+    while(ss >> s)
     {
         const auto& v1 = split(s, ',');
         if(v1.size() >= 2)
             points.push_back(QPointF(stof(v1[0]), stof(v1[1])));
     }
-    std::cout << "Number of points: " << points.size() << "\n";
     this->setPolygon(QPolygonF(QList<QPointF>(points.begin(), points.end())));
     this->loadStylesFromXML(this, xml);
-    this->setFlags(QGraphicsItem::ItemSendsGeometryChanges);
 }
 
 XMLTag Polygon::toXML() const
 {
     XMLTag xml(false);
+    xml.name = "polygon";
     xml.properties["points"] = points_to_string(this->polygon().toList());
     this->addStylesToXML(this, xml);
     return xml;

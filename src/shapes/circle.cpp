@@ -15,19 +15,24 @@ Circle::Circle(float cx, float cy, float rad)
 Circle::Circle(const XMLTag& xml)
     : QGraphicsEllipseItem()
 {
+    updateFromXML(xml);
+    this->setFlags(QGraphicsItem::ItemSendsGeometryChanges);
+}
+
+void Circle::updateFromXML(const XMLTag& xml)
+{
     float cx = stof(xml.properties.at("cx"));
     float cy = stof(xml.properties.at("cy"));
     float rad = stof(xml.properties.at("r"));
     this->setRect(cx-rad, cy-rad, rad*2, rad*2);
     this->loadStylesFromXML(this, xml);
-    this->setFlags(QGraphicsItem::ItemSendsGeometryChanges);
 }
 
 XMLTag Circle::toXML() const
 {
     float rad = this->rect().height()/2;
-    float cx = this->rect().x() + rad;
-    float cy = this->rect().y() + rad;
+    float cx = rect().topLeft().x() + rad;
+    float cy = rect().topLeft().y() + rad;
     XMLTag xml(false);
     xml.name = "circle";
     xml.properties["r"] = std::to_string(rad);

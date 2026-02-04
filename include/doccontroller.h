@@ -13,6 +13,9 @@ public:
     explicit DocController(QObject *parent = nullptr);
     void setScene(GraphicScene* scene);
 
+signals:
+    void setWindowTitle(const QString& title);
+
 public slots:
     void load_file(const QString& filename, const QString &content);
 

@@ -22,6 +22,7 @@ class Shape
 public:
     virtual ~Shape() {}
     virtual XMLTag toXML() const = 0;
+    virtual void updateFromXML(const XMLTag& xml) = 0;
     virtual void updateShapeOnDraw(QPointF start, QPointF cur) {}
 
     static void addStylesToXML(const QAbstractGraphicsShapeItem* item, XMLTag& xml);
@@ -41,9 +42,9 @@ public:
     Rectangle(float x, float y, float w, float h);
     Rectangle(const XMLTag& xml);
     XMLTag toXML() const override;
+    void updateFromXML(const XMLTag& xml) override;
     void updateShapeOnDraw(QPointF start, QPointF cur) override;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = nullptr) override;
-private:
     float rx=0, ry=0; // For rounded rectangle functionality
 };
 
@@ -55,6 +56,7 @@ public:
     Circle(const XMLTag& xml);
     void updateShapeOnDraw(QPointF start, QPointF cur) override;
     XMLTag toXML() const override;
+    void updateFromXML(const XMLTag& xml) override;
 };
 
 
@@ -64,6 +66,7 @@ public:
     TextShape(float x, float y, const std::string& text);
     TextShape(const XMLTag& xml);
     XMLTag toXML() const override;
+    void updateFromXML(const XMLTag& xml) override;
 };
 
 
@@ -74,6 +77,7 @@ public:
     Polygon(const XMLTag& xml);
     void updateShapeOnDraw(QPointF start, QPointF cur) override;
     XMLTag toXML() const override;
+    void updateFromXML(const XMLTag& xml) override;
 };
 
 class Line : public Shape, public QGraphicsPolygonItem
@@ -83,6 +87,7 @@ public:
     Line(const XMLTag& xml);
     void updateShapeOnDraw(QPointF start, QPointF cur) override;
     XMLTag toXML() const override;
+    void updateFromXML(const XMLTag& xml) override;
 };
 
 
@@ -93,6 +98,7 @@ public:
     FreehandPath(const XMLTag& xml);
     void updateShapeOnDraw(QPointF start, QPointF cur) override;
     XMLTag toXML() const override;
+    void updateFromXML(const XMLTag& xml) override;
 };
 
 #endif

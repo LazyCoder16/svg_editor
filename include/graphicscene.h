@@ -24,9 +24,12 @@ public:
     void deleteShape(QAbstractGraphicsShapeItem* shape);
     void addDeletedShape(QAbstractGraphicsShapeItem* shape);
 
+    QGraphicsRectItem *viewportRect;
+    UndoStack undoStack;
+
 signals:
     void centreCanvasOn(float x, float y);
-    void selectedShapesChanged(std::vector<QAbstractGraphicsShapeItem*> selectedShapes);
+    void selectedShapesChanged(const std::vector<QAbstractGraphicsShapeItem*>& selectedShapes);
 
 public slots:
     void setViewportRect(float w, float h);
@@ -43,7 +46,6 @@ protected:
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
 
 private:
-    QGraphicsRectItem *viewportRect;
     QAbstractGraphicsShapeItem *ghostItem;
     std::set<QAbstractGraphicsShapeItem*> shapes;
     std::map<QAbstractGraphicsShapeItem*, std::unique_ptr<QAbstractGraphicsShapeItem> > deletedShapes; 
@@ -52,5 +54,4 @@ private:
     bool dragStarted = false;
     QPointF startDrawPoint;
     QPointF startDragPos;
-    UndoStack undoStack;
 };

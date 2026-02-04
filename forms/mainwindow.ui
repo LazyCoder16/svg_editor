@@ -36,6 +36,16 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QFrame" name="frame">
+        <property name="frameShape">
+         <enum>QFrame::Shape::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Shadow::Raised</enum>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
     <item>
@@ -81,6 +91,15 @@
    <addaction name="menuEdit"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <widget class="PropertiesDock" name="dockWidget">
+   <property name="features">
+    <set>QDockWidget::DockWidgetFeature::DockWidgetFloatable</set>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents"/>
+  </widget>
   <action name="actionNew">
    <property name="text">
     <string>New</string>
@@ -184,6 +203,12 @@
    <class>ToolBarWidget</class>
    <extends>QWidget</extends>
    <header>toolbarwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PropertiesDock</class>
+   <extends>QDockWidget</extends>
+   <header>propertiesdock.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

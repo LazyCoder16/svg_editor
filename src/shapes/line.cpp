@@ -17,13 +17,20 @@ Line::Line(float x1, float y1, float x2, float y2)
 
 
 Line::Line(const XMLTag& xml)
-    : QGraphicsPolygonItem(QPolygonF(QList<QPointF> {
+    : QGraphicsPolygonItem()
+{
+    this->updateFromXML(xml);
+    this->setFlags(QGraphicsItem::ItemSendsGeometryChanges);
+}
+
+
+void Line::updateFromXML(const XMLTag& xml)
+{
+    this->setPolygon(QPolygonF(QList<QPointF> {
         QPointF(std::stof(xml.properties.at("x1")), std::stof(xml.properties.at("y1"))), 
         QPointF(std::stof(xml.properties.at("x2")), std::stof(xml.properties.at("y2")))
-    }))
-{
+    }));
     this->loadStylesFromXML(this, xml);
-    this->setFlags(QGraphicsItem::ItemSendsGeometryChanges);
 }
 
 

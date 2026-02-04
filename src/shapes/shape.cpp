@@ -4,12 +4,17 @@
 #include <QColor>
 #include <QString>
 #include <QPen>
+#include <QtCore/qnamespace.h>
+#include <QtGui/qcolor.h>
 #include <QtWidgets/qgraphicsitem.h>
 #include <string>
 
 void Shape::addStylesToXML(const QAbstractGraphicsShapeItem* item, XMLTag& xml)
 {
-    std::string fill_color = item->brush().color().name().toStdString();
+    std::string fill_color = item->brush().color().name(QColor::HexArgb).toStdString();
+    if(item->brush() == Qt::NoBrush) {
+        fill_color = "#00000000";
+    }
     std::string stroke_color = item->pen().brush().color().name().toStdString();
     float stroke_width = item->pen().width();
     xml.properties["fill"] = fill_color;

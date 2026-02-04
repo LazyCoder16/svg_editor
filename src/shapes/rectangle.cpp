@@ -1,7 +1,10 @@
 #include "xmlparser.h"
 #include "shapes.h"
 #include <QGraphicsItem>
+#include <QtCore/qnamespace.h>
 #include <QtCore/qpoint.h>
+#include <QtGui/qbrush.h>
+#include <QtGui/qcolor.h>
 #include <string>
 #include <QPainter>
 
@@ -15,13 +18,18 @@ Rectangle::Rectangle(float x, float y, float w, float h)
 
 
 Rectangle::Rectangle(const XMLTag& xml)
-    : QGraphicsRectItem(
-        stof(xml.properties.at("x")),
+    : QGraphicsRectItem()
+{
+    this->updateFromXML(xml);
+    this->setFlags(QGraphicsItem::ItemSendsGeometryChanges);
+}
+
+void Rectangle::updateFromXML(const XMLTag& xml)
+{
+    this->setRect(stof(xml.properties.at("x")),
         stof(xml.properties.at("y")),
         stof(xml.properties.at("width")),
-        stof(xml.properties.at("height"))
-    )
-{
+        stof(xml.properties.at("height")));
     if(xml.properties.find("rx") != xml.properties.end()) 
     {
         rx = std::stof(xml.properties.at("rx"));
@@ -31,17 +39,20 @@ Rectangle::Rectangle(const XMLTag& xml)
         ry = std::stof(xml.properties.at("ry"));
     }
     this->loadStylesFromXML(this, xml);
-    this->setFlags(QGraphicsItem::ItemSendsGeometryChanges);
+    prepareGeometryChange();
+    update();
 }
 
 XMLTag Rectangle::toXML() const
 {
     XMLTag xml(false);
     xml.name = "rect";
-    xml.properties["x"] = std::to_string(this->pos().x());
-    xml.properties["y"] = std::to_string(this->pos().x());
+    xml.properties["x"] = std::to_string(rect().topLeft().x());
+    xml.properties["y"] = std::to_string(rect().topLeft().y());
     xml.properties["width"] = std::to_string(this->rect().width());
     xml.properties["height"] = std::to_string(this->rect().height());
+    xml.properties["rx"] = std::to_string(rx);
+    xml.properties["ry"] = std::to_string(ry);
     this->addStylesToXML(this, xml);
     return xml;
 }
@@ -51,6 +62,11 @@ void Rectangle::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
     painter->setBrush(brush());
     painter->setPen(pen());
     painter->drawRoundedRect(rect(), rx, ry);
+    if(this->isSelected()) {
+        painter->setBrush(Qt::NoBrush);
+        painter->setPen(QPen(QBrush(Qt::red), 2, Qt::DotLine));
+        painter->drawRect(rect());
+    }
 }
 
 void Rectangle::updateShapeOnDraw(QPointF start, QPointF cur)
