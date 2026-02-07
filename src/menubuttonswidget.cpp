@@ -27,30 +27,3 @@ MenuButtonsWidget::~MenuButtonsWidget()
 {
     delete ui;
 }
-
-void MenuButtonsWidget::on_pushButton_New_clicked()
-{
-    emit buttonClicked("New");
-}
-
-void MenuButtonsWidget::on_pushButton_Copy_clicked()
-{
-    emit buttonClicked("Copy");
-}
-
-void MenuButtonsWidget::on_pushButton_Open_clicked()
-{
-    QString filename = QFileDialog::getOpenFileName(nullptr, tr("Open File"), QString(), tr("SVG File (*.svg)"));
-    if(!filename.isNull()) {
-        QFile file(filename);
-        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            qDebug() << "Failed to open file:" << filename;
-            return;
-        }
-        qDebug() << filename.toStdString() << "\n";
-        QTextStream in(&file);
-        emit file_loaded(filename, in.readAll());
-        file.close();
-    }
-}
-

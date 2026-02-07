@@ -24,6 +24,7 @@ public:
     void deleteShape(QAbstractGraphicsShapeItem* shape);
     void addDeletedShape(QAbstractGraphicsShapeItem* shape);
 
+    std::set<QAbstractGraphicsShapeItem*> shapes;
     QGraphicsRectItem *viewportRect;
     UndoStack undoStack;
 
@@ -39,6 +40,10 @@ public slots:
     // So that other objects can access the undo stack object of the scene
     void undo() { undoStack.undo(); }
     void redo() { undoStack.redo(); }
+    // Clipboard actions
+    void copyAction();
+    void cutAction();
+    void pasteAction();
 
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
@@ -47,7 +52,6 @@ protected:
 
 private:
     QAbstractGraphicsShapeItem *ghostItem;
-    std::set<QAbstractGraphicsShapeItem*> shapes;
     std::map<QAbstractGraphicsShapeItem*, std::unique_ptr<QAbstractGraphicsShapeItem> > deletedShapes; 
     ToolType curTool;
     bool drawShapeStarted = false;

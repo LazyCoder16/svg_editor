@@ -78,6 +78,10 @@ public:
     void updateShapeOnDraw(QPointF start, QPointF cur) override;
     XMLTag toXML() const override;
     void updateFromXML(const XMLTag& xml) override;
+    float getRadius();
+    void setRadius(float rad);
+private:
+    QPointF getCentroid();
 };
 
 class Line : public Shape, public QGraphicsPolygonItem

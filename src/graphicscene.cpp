@@ -1,13 +1,16 @@
 #include "graphicscene.h"
 #include "Enums.h"
 #include "commands.h"
+#include "doccontroller.h"
 #include "shapes.h"
+#include "xmlparser.h"
 #include <QGraphicsRectItem>
 #include <QGraphicsEllipseItem>
 #include <QGraphicsTextItem>
 #include <QtCore/qnamespace.h>
 #include <QtCore/qpoint.h>
 #include <QtGui/qbrush.h>
+#include <QtGui/qguiapplication.h>
 #include <QtGui/qpainterpath.h>
 #include <QtGui/qtransform.h>
 #include <QtWidgets/qgraphicsitem.h>
@@ -18,7 +21,9 @@
 #include <iostream>
 #include <QGraphicsSceneMouseEvent>
 #include <memory>
+#include <sstream>
 #include <vector>
+#include <QClipboard>
 
 
 GraphicScene::GraphicScene(QWidget* parent)
@@ -212,4 +217,60 @@ void GraphicScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         dragStarted = false;
     }
     QGraphicsScene::mouseReleaseEvent(event);
+}
+
+/*
+Clipboard Actions
+*/
+void GraphicScene::copyAction()
+{
+    auto selectedItems = this->selectedItems();
+    if(!selectedItems.empty())
+    {
+        auto clipboard = QGuiApplication::clipboard();
+        XMLTag xml;
+        xml.name = "svg";
+        for(auto item : selectedItems) {
+            auto shape = dynamic_cast<Shape*>(item);
+            xml.children.push_back(shape->toXML());
+        }
+        std::stringstream ss;
+        ss << xml;
+        clipboard->setText(QString::fromStdString(ss.str()));
+    }
+}
+
+void GraphicScene::cutAction()
+{
+    this->copyAction();
+    this->deleteSelectedItem();
+}
+
+void GraphicScene::pasteAction()
+{
+    std::string clipText = QGuiApplication::clipboard()->text().toStdString();
+    if(!clipText.empty())
+    {
+        for(auto item : this->selectedItems())
+        {
+            item->setSelected(false);
+        }
+        XMLTag xml;
+        XMLParser::parse_file(clipText, xml);
+        std::vector<std::unique_ptr<QAbstractGraphicsShapeItem>> shapes;
+        std::vector<QAbstractGraphicsShapeItem*> raw_shapes;
+        DocController::extract_shapes(xml, shapes);
+        for(int i=0; i<shapes.size(); ++i)
+        {
+            shapes[i]->setPos(20, 20);
+            shapes[i]->setFlag(QGraphicsItem::ItemIsSelectable, true);
+            shapes[i]->setFlag(QGraphicsItem::ItemIsMovable, true);
+            shapes[i]->setSelected(true);
+            raw_shapes.push_back(shapes[i].get());
+            this->addShape(std::move(shapes[i]));
+        }
+        this->undoStack.addAction(std::make_unique<AddDeleteShapeCommand>(
+            raw_shapes, this, true
+        ));
+    }
 }

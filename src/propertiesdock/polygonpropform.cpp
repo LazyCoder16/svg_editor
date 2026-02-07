@@ -6,9 +6,11 @@
 #include <QGraphicsRectItem>
 #include <QDoubleSpinBox>
 #include <QLabel>
+#include <QtCore/qnamespace.h>
 #include <QtWidgets/qformlayout.h>
 #include <QtWidgets/qgroupbox.h>
 #include <QtWidgets/qlabel.h>
+#include <QtWidgets/qslider.h>
 #include <QtWidgets/qspinbox.h>
 #include <QGroupBox>
 #include <memory>
@@ -24,6 +26,10 @@ PolygonPropForm::PolygonPropForm(QWidget* parent, GraphicScene* scene, Polygon* 
     auto fillColor = this->getColorButton(polygon->brush().color());
     auto strokeWidth = this->getSpinBox(polygon->pen().widthF());
     auto strokeColor = this->getColorButton(polygon->pen().color());
+    auto radiusSlider = new QSlider(Qt::Horizontal, this);
+    radiusSlider->setRange(1, polygon->getRadius()*2);
+    radiusSlider->setValue(polygon->getRadius());
+
     // Prevent cycle and update
     connect(&scene->undoStack, &UndoStack::stackChanged, this, [=]() {
         this->blockSignals = true;
@@ -36,7 +42,11 @@ PolygonPropForm::PolygonPropForm(QWidget* parent, GraphicScene* scene, Polygon* 
     // Trigger actions on change
     this->implFillColor(polygon, opacity, fillColor);
     this->implStrokeStyle(polygon, strokeWidth, strokeColor);
+    this->implRadiusSlider(radiusSlider, polygon);
     // Render
+    auto groupBox = new QGroupBox("Geometry", this);
+    auto layout = new QFormLayout(groupBox);
+    layout->addRow(getLabel("Size"), radiusSlider);
     auto groupBox1 = new QGroupBox("Styles", this);
     auto layout1 = new QFormLayout(groupBox1);
     layout1->addRow(getLabel("Fill opacity"), opacity);
@@ -44,5 +54,21 @@ PolygonPropForm::PolygonPropForm(QWidget* parent, GraphicScene* scene, Polygon* 
     layout1->addRow(getLabel("Stroke width"), strokeWidth);
     layout1->addRow(getLabel("Stroke color"), strokeColor);
     groupBox1->setLayout(layout1);
+    mainLayout->addWidget(groupBox);
     mainLayout->addWidget(groupBox1);
+}
+
+
+void PolygonPropForm::implRadiusSlider(QSlider* slider, Polygon* polygon)
+{
+    connect(slider, &QSlider::sliderPressed, this, [=]() {
+        this->startDragState = polygon->toXML();
+    });
+    connect(slider, &QSlider::valueChanged, this, [=](int val) {
+        polygon->setRadius(val);
+    });
+    connect(slider, &QSlider::sliderReleased, this, [=]() {
+        auto curState = polygon->toXML();
+        this->addXMLAction(polygon, startDragState, curState);
+    });
 }

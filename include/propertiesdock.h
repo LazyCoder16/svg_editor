@@ -104,6 +104,9 @@ class PolygonPropForm : public PropertiesForm
     Q_OBJECT;
 public:
     PolygonPropForm(QWidget* parent, GraphicScene* scene, Polygon* polygon);
+private:
+    XMLTag startDragState;
+    void implRadiusSlider(QSlider* slider, Polygon* polygon);
 };
 
 

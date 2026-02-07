@@ -183,11 +183,16 @@ std::ostream& operator<<(std::ostream& os, const XMLTag& tag)
     {
         os << attr.first << "=" << '"' << attr.second << '"' << " ";
     }
-    os << ">\n";
-    for(const XMLTag& child : tag.children)
-    {
-        os << child;
+    if(tag.children.size() > 0) {
+        os << ">\n";
+        for(const XMLTag& child : tag.children)
+        {
+            os << child;
+        }
+        os << "</" << tag.name << ">\n";
     }
-    os << "</" << tag.name << ">\n";
+    else {
+        os << " />\n";
+    }
     return os;
 }

@@ -96,3 +96,40 @@ void Polygon::updateShapeOnDraw(QPointF start, QPointF cur)
     }
     this->setPolygon(QPolygonF(QList<QPointF>(points.begin(), points.end())));
 }
+
+QPointF Polygon::getCentroid()
+{
+    QPointF centroid(0, 0);
+    int n = this->polygon().size();
+    for(const auto &point : this->polygon())
+    {
+        centroid += point / n;
+    }
+    return centroid;
+}
+
+float Polygon::getRadius()
+{
+    QPointF centroid = this->getCentroid();
+    int n = this->polygon().size();
+    float radius = 0;
+    for(const auto &point : this->polygon())
+    {
+        radius += QLineF(centroid, point).length() / n;
+    }
+    return radius;
+}
+
+void Polygon::setRadius(float newRadius)
+{
+    float curRadius = this->getRadius();
+    float scale = newRadius / curRadius;
+    auto centroid = this->getCentroid();
+    QList<QPointF> newPolygon;
+    for(const auto &point : this->polygon())
+    {
+        auto newPoint = centroid + ((point - centroid) * scale);
+        newPolygon.push_back(newPoint);
+    }
+    this->setPolygon(QPolygonF(newPolygon));
+}

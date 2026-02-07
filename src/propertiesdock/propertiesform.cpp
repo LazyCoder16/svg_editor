@@ -15,6 +15,7 @@
 #include <QtWidgets/qwidget.h>
 #include <memory>
 #include <QColorDialog>
+#include <string>
 
 
 
@@ -99,7 +100,7 @@ void PropertiesForm::implFillColor(Shape* shape, QSlider* slider, QPushButton* b
     connect(slider, &QSlider::sliderReleased, this, [=]() {
         XMLTag cur = shape->toXML();
         QAbstractGraphicsShapeItem* qshape = dynamic_cast<QAbstractGraphicsShapeItem*>(shape);
-        cur.properties["fill"] = qshape->brush().color().name(QColor::HexArgb).toStdString();
+        cur.properties["fill-opacity"] = std::to_string(slider->value() / 255.0);
         this->addXMLAction(shape, startSliderDragState, cur);
     });
     connect(button, &QPushButton::clicked, this, [=]() {
@@ -112,8 +113,7 @@ void PropertiesForm::implFillColor(Shape* shape, QSlider* slider, QPushButton* b
         if(newColor.isValid())
         {
             XMLTag old = shape->toXML(), cur = old;
-            std::string ophex = QString("%1").arg(slider->value(), 2, 16, QChar('0')).toStdString();
-            cur.properties["fill"] = "#" + ophex + newColor.name().toStdString().substr(1);
+            cur.properties["fill"] = newColor.name().toStdString();
             this->addXMLAction(shape, old, cur);
         }
     });

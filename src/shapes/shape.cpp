@@ -6,6 +6,7 @@
 #include <QPen>
 #include <QtCore/qnamespace.h>
 #include <QtGui/qcolor.h>
+#include <QtGui/qpen.h>
 #include <QtWidgets/qgraphicsitem.h>
 #include <string>
 
@@ -15,19 +16,30 @@ void Shape::addStylesToXML(const QAbstractGraphicsShapeItem* item, XMLTag& xml)
     if(item->brush() == Qt::NoBrush) {
         fill_color = "#00000000";
     }
+    float opacity = std::stoi(fill_color.substr(1, 2), nullptr, 16) / 255.0;
     std::string stroke_color = item->pen().brush().color().name().toStdString();
     float stroke_width = item->pen().width();
-    xml.properties["fill"] = fill_color;
+    if(item->pen().style() == Qt::NoPen) {
+        stroke_width = 0;
+    }
+    xml.properties["fill"] = "#" + fill_color.substr(3);
     xml.properties["stroke"] = stroke_color;
     xml.properties["stroke-width"] = std::to_string(stroke_width);
+    xml.properties["fill-opacity"] = std::to_string(opacity);
 }
 
 
 void Shape::loadStylesFromXML(QAbstractGraphicsShapeItem *item, const XMLTag &xml)
 {
+    int opacity = 255;
+    if(xml.properties.find("fill-opacity") != xml.properties.end())
+    {
+        opacity = 255 * stof(xml.properties.at("fill-opacity"));
+    }
     if(xml.properties.find("fill") != xml.properties.end())
     {
-        Shape::setFillColor(item, xml.properties.at("fill"));
+        std::string ophex = QString("%1").arg(opacity, 2, 16, QChar('0')).toStdString();
+        Shape::setFillColor(item, "#" + ophex + xml.properties.at("fill").substr(1));
     }
     if(xml.properties.find("stroke") != xml.properties.end())
     {

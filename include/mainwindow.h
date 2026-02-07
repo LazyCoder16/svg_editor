@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <QPushButton>
 #include <QGraphicsScene>
+#include <QCloseEvent>
+#include <QtGui/qevent.h>
 #include "doccontroller.h"
 #include "graphicscene.h"
 
@@ -22,12 +24,10 @@ public:
     ~MainWindow();
 
 private slots:
-    void buttonClicked(const std::string& s);
     void setMousePosition(int x, int y);
 
-//private slots:
-//    void on_actionNew_triggered();
-//    void on_actionSave_triggered();
+protected:
+    void closeEvent(QCloseEvent* event) override;
 
 private:
     Ui::MainWindow *ui;
