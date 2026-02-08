@@ -33,20 +33,20 @@ class PropertiesForm : public QWidget
 public:
     PropertiesForm(QWidget* parent, GraphicScene* scene);
     virtual ~PropertiesForm() {}
-    void addCommand(std::unique_ptr<Command> command);
-    QDoubleSpinBox* getSpinBox(float init_val, bool neg=false, const std::string& suffix="px");
-    QLabel* getLabel(const QString& text, int font_size=12);
-    QSlider* getSlider(QBrush ival, int from=0, int to=255);
-    QPushButton* getColorButton(QColor icolor);
-    void addXMLAction(Shape* shape, const XMLTag& old, const XMLTag& cur);
-    void implSpinBoxChange(Shape* shape, QDoubleSpinBox* spinBox, const std::string& propName);
-    void implFillColor(Shape* shape, QSlider* slider, QPushButton* button);
-    void implStrokeStyle(Shape* shape, QDoubleSpinBox* spinBox, QPushButton* button);
-    bool blockSignals = false;
+    void AddCommand(std::unique_ptr<Command> command);
+    QDoubleSpinBox* GetSpinBox(float init_val, bool neg=false, const std::string& suffix="px");
+    QLabel* GetLabel(const QString& text, int font_size=12);
+    QSlider* GetSlider(QBrush ival, int from=0, int to=255);
+    QPushButton* GetColorButton(QColor icolor);
+    void AddXMLAction(Shape* shape, const XMLTag& old, const XMLTag& cur);
+    void ImplSpinBoxChange(Shape* shape, QDoubleSpinBox* spinBox, const std::string& propName);
+    void ImplFillColor(Shape* shape, QSlider* slider, QPushButton* button);
+    void ImplStrokeStyle(Shape* shape, QDoubleSpinBox* spinBox, QPushButton* button);
+    bool block_signals = false;
 
 private:
-    GraphicScene *scene;
-    XMLTag startSliderDragState;
+    GraphicScene *scene_;
+    XMLTag start_slider_drag_state_;
 };
 
 
@@ -55,15 +55,15 @@ class PropertiesDock : public QDockWidget
     Q_OBJECT;
 public:
     PropertiesDock(QWidget *parent = nullptr);
-    void setScene(GraphicScene *scene);
+    void SetScene(GraphicScene *scene);
 
 public slots:
-    void setSelectedShapes(const std::vector<QAbstractGraphicsShapeItem*>& shapes);
+    void SetSelectedShapes(const std::vector<QAbstractGraphicsShapeItem*>& shapes);
 
 private:
-    std::vector<QAbstractGraphicsShapeItem*> selectedShapes;
-    GraphicScene *scene;
-    PropertiesForm *form = nullptr;
+    std::vector<QAbstractGraphicsShapeItem*> selected_shapes_;
+    GraphicScene *scene_;
+    PropertiesForm *form_ = nullptr;
 };
 
 
@@ -105,8 +105,8 @@ class PolygonPropForm : public PropertiesForm
 public:
     PolygonPropForm(QWidget* parent, GraphicScene* scene, Polygon* polygon);
 private:
-    XMLTag startDragState;
-    void implRadiusSlider(QSlider* slider, Polygon* polygon);
+    XMLTag start_drag_state_;
+    void ImplRadiusSlider(QSlider* slider, Polygon* polygon);
 };
 
 
@@ -122,9 +122,11 @@ class TextPropForm : public PropertiesForm
     Q_OBJECT;
 public:
     TextPropForm(QWidget* parent, GraphicScene* scene, TextShape* shape);
+    void SaveCurChanges();
     ~TextPropForm();
-    XMLTag old;
-    TextShape* shape;
+private:
+    XMLTag old_;
+    TextShape* shape_;
 };
 
 #endif

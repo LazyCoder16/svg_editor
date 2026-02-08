@@ -1,3 +1,4 @@
+#include "propertiesdock.h"
 #include "shapes.h"
 #include "xmlparser.h"
 #include <QGraphicsItem>
@@ -13,7 +14,7 @@
 #include <sstream>
 
 
-std::vector<std::string> split(const std::string& s, char del)
+std::vector<std::string> SplitString(const std::string& s, char del)
 {
     std::string buffer;
     std::vector<std::string> v;
@@ -33,7 +34,7 @@ std::vector<std::string> split(const std::string& s, char del)
     return v;
 }
 
-std::string points_to_string(const QList<QPointF>& points)
+std::string PointToStr(const QList<QPointF>& points)
 {
     std::string s;
     for(QPointF point : points)
@@ -53,35 +54,35 @@ Polygon::Polygon(const std::vector<QPointF>& points)
 Polygon::Polygon(const XMLTag& xml)
     : QGraphicsPolygonItem()
 {
-    this->updateFromXML(xml);
+    this->UpdateFromXML(xml);
     this->setFlags(QGraphicsItem::ItemSendsGeometryChanges);
 }
 
-void Polygon::updateFromXML(const XMLTag& xml)
+void Polygon::UpdateFromXML(const XMLTag& xml)
 {
     std::vector<QPointF> points;
     std::stringstream ss(xml.properties.at("points"));
     std::string s;
     while(ss >> s)
     {
-        const auto& v1 = split(s, ',');
+        const auto& v1 = SplitString(s, ',');
         if(v1.size() >= 2)
             points.push_back(QPointF(stof(v1[0]), stof(v1[1])));
     }
     this->setPolygon(QPolygonF(QList<QPointF>(points.begin(), points.end())));
-    this->loadStylesFromXML(this, xml);
+    this->LoadStylesFromXML(this, xml);
 }
 
-XMLTag Polygon::toXML() const
+XMLTag Polygon::ToXML() const
 {
     XMLTag xml(false);
     xml.name = "polygon";
-    xml.properties["points"] = points_to_string(this->polygon().toList());
-    this->addStylesToXML(this, xml);
+    xml.properties["points"] = PointToStr(this->polygon().toList());
+    this->AddStylesToXML(this, xml);
     return xml;
 }
 
-void Polygon::updateShapeOnDraw(QPointF start, QPointF cur)
+void Polygon::UpdateShapeOnDraw(QPointF start, QPointF cur)
 {
     float r = QLineF(start, cur).length();
     float phi = std::atan2(cur.y()-start.y(), cur.x()-start.x());
@@ -97,7 +98,7 @@ void Polygon::updateShapeOnDraw(QPointF start, QPointF cur)
     this->setPolygon(QPolygonF(QList<QPointF>(points.begin(), points.end())));
 }
 
-QPointF Polygon::getCentroid()
+QPointF Polygon::GetCentroid()
 {
     QPointF centroid(0, 0);
     int n = this->polygon().size();
@@ -108,9 +109,9 @@ QPointF Polygon::getCentroid()
     return centroid;
 }
 
-float Polygon::getRadius()
+float Polygon::GetRadius()
 {
-    QPointF centroid = this->getCentroid();
+    QPointF centroid = this->GetCentroid();
     int n = this->polygon().size();
     float radius = 0;
     for(const auto &point : this->polygon())
@@ -120,16 +121,22 @@ float Polygon::getRadius()
     return radius;
 }
 
-void Polygon::setRadius(float newRadius)
+void Polygon::SetRadius(float newRadius)
 {
-    float curRadius = this->getRadius();
-    float scale = newRadius / curRadius;
-    auto centroid = this->getCentroid();
-    QList<QPointF> newPolygon;
+    float cur_radius = this->GetRadius();
+    float scale = newRadius / cur_radius;
+    auto centroid = this->GetCentroid();
+    QList<QPointF> new_polygon;
     for(const auto &point : this->polygon())
     {
-        auto newPoint = centroid + ((point - centroid) * scale);
-        newPolygon.push_back(newPoint);
+        auto new_point = centroid + ((point - centroid) * scale);
+        new_polygon.push_back(new_point);
     }
-    this->setPolygon(QPolygonF(newPolygon));
+    this->setPolygon(QPolygonF(new_polygon));
 }
+
+PropertiesForm* Polygon::GetPropertyForm(QWidget* parent)
+{
+    return new PolygonPropForm(parent, static_cast<GraphicScene*>(this->scene()), this);
+}
+

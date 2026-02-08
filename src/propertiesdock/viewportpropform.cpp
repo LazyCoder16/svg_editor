@@ -16,37 +16,37 @@ ViewportPropForm::ViewportPropForm(QWidget* parent, GraphicScene* scene)
     : PropertiesForm(parent, scene)
 {
     // Initialize
-    QVBoxLayout* mainLayout = new QVBoxLayout(this);
-    auto viewport = scene->viewportRect;
-    auto width = this->getSpinBox(viewport->rect().width());
-    auto height = this->getSpinBox(viewport->rect().height());
+    QVBoxLayout* main_layout = new QVBoxLayout(this);
+    auto viewport = scene->GetViewPortRect();
+    auto width = this->GetSpinBox(viewport->rect().width());
+    auto height = this->GetSpinBox(viewport->rect().height());
     // Prevent cycle
-    connect(&scene->undoStack, &UndoStack::stackChanged, this, [=]() {
-        this->blockSignals = true;
+    connect(scene->GetUndoStack(), &UndoStack::StackChanged, this, [=]() {
+        this->block_signals = true;
         width->setValue(viewport->rect().width());
         height->setValue(viewport->rect().height());
-        this->blockSignals = false;
+        this->block_signals = false;
     });
     // Trigger actions on change
     connect(width, &QDoubleSpinBox::editingFinished, this, [=]() {
-        if(this->blockSignals) return;
+        if(this->block_signals) return;
         float w = width->value();
-        scene->addAction(std::make_unique<ViewportChangeCommand>(
+        scene->AddAction(std::make_unique<ViewportChangeCommand>(
             viewport, viewport->rect().width(), viewport->rect().height(), w, viewport->rect().height()
         ));
     });
     connect(height, &QDoubleSpinBox::editingFinished, this, [=]() {
-        if(this->blockSignals) return;
+        if(this->block_signals) return;
         float h = height->value();
-        scene->addAction(std::make_unique<ViewportChangeCommand>(
+        scene->AddAction(std::make_unique<ViewportChangeCommand>(
             viewport, viewport->rect().width(), viewport->rect().height(), viewport->rect().width(), h
         ));
     });
     // Render
-    auto groupBox = new QGroupBox("Viewport", this);
-    auto layout = new QFormLayout(groupBox);
-    layout->addRow(getLabel("Width"), width);
-    layout->addRow(getLabel("Height"), height);
-    groupBox->setLayout(layout);
-    mainLayout->addWidget(groupBox);
+    auto group_box = new QGroupBox("Viewport", this);
+    auto layout = new QFormLayout(group_box);
+    layout->addRow(GetLabel("Width"), width);
+    layout->addRow(GetLabel("Height"), height);
+    group_box->setLayout(layout);
+    main_layout->addWidget(group_box);
 }

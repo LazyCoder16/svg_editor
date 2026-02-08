@@ -21,28 +21,28 @@ DocController::DocController(QObject *parent)
     : QObject{parent}
 {}
 
-void DocController::setScene(GraphicScene* scene)
+void DocController::SetScene(GraphicScene* scene)
 {
-    this->scene = scene;
+    this->scene_ = scene;
 }
 
-bool DocController::discardChangesDialog()
+bool DocController::DiscardChangesDialog()
 {
     // Returns true if the file operation can continue; false if the user clicks cancel
     // Called during open file, new file and close application operations
-    if(scene->undoStack.isClean()) return true; // All changes are saved
+    if(scene_->IsSaved()) return true; // All changes are saved
     auto reply = QMessageBox::warning(nullptr, 
                                     "Unsaved changes",
                                     "The document has been modifies.\nDo you want to save your changes?",
                                     QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
     if(reply == QMessageBox::Cancel) return false;
     if(reply == QMessageBox::Save) {
-        if(curFilename.empty()) {
-            auto filename = openSaveDialog();
-            if(!filename.empty()) saveToFile(filename);
+        if(cur_filename_.empty()) {
+            auto filename = OpenSaveDialog();
+            if(!filename.empty()) SaveToFile(filename);
         }
         else {
-            saveToFile(curFilename);
+            SaveToFile(cur_filename_);
         }
         return true;
     }
@@ -53,9 +53,9 @@ bool DocController::discardChangesDialog()
 /*
 Main slots
 */
-void DocController::openFile()
+void DocController::OpenFile()
 {
-    if(!discardChangesDialog()) return;
+    if(!DiscardChangesDialog()) return;
     QString filename = QFileDialog::getOpenFileName(
         nullptr, tr("Open File"), QString(), tr("SVG File (*.svg)"));
     if(filename.isNull()) return;
@@ -68,58 +68,58 @@ void DocController::openFile()
     QString content = QTextStream(&file).readAll();
     qDebug() << content << "\n";
     XMLTag root(false);
-    XMLParser::parse_file(content.toStdString(), root);
+    XMLParser::ParseFile(content.toStdString(), root);
     std::cout << root << "\n";
-    this->curFilename = filename.toStdString();
+    this->cur_filename_ = filename.toStdString();
 
-    scene->removeAllItems();
+    scene_->RemoveAllItems();
     if(root.properties.find("width") != root.properties.end() 
         && root.properties.find("height") != root.properties.end())
     {
-        scene->setViewportRect(std::stof(root.properties.at("width")), std::stof(root.properties.at("height")));
+        scene_->SetViewportRect(std::stof(root.properties.at("width")), std::stof(root.properties.at("height")));
     }
     std::vector<std::unique_ptr<QAbstractGraphicsShapeItem> > shapes;
-    extract_shapes(root, shapes);
+    ExtractShapes(root, shapes);
     for(int i=0; i<shapes.size(); ++i) 
     {
         shapes[i]->setFlag(QGraphicsItem::ItemIsSelectable, true);
         shapes[i]->setFlag(QGraphicsItem::ItemIsMovable, true);
-        scene->addShape(std::move(shapes[i]));
+        scene_->AddShape(std::move(shapes[i]));
     }
 }
 
-void DocController::newFile()
+void DocController::NewFile()
 {
-    if(discardChangesDialog())
+    if(DiscardChangesDialog())
     {
-        this->curFilename.clear();
-        scene->removeAllItems();
-        scene->undoStack.setClean();
+        this->cur_filename_.clear();
+        scene_->RemoveAllItems();
+        scene_->SetSaved();
     }
 }
 
-void DocController::saveFile()
+void DocController::SaveFile()
 {
-    if(curFilename.empty()) {
-        curFilename = openSaveDialog();
+    if(cur_filename_.empty()) {
+        cur_filename_ = OpenSaveDialog();
     }
-    if(!curFilename.empty()) {
-        if(this->saveToFile(curFilename)) {
-            this->scene->undoStack.setClean();
+    if(!cur_filename_.empty()) {
+        if(this->SaveToFile(cur_filename_)) {
+            this->scene_->SetSaved();
         }
         else {
-            curFilename.clear();
+            cur_filename_.clear();
         }
     }
 }
 
-void DocController::saveAs()
+void DocController::SaveAs()
 {
-    std::string filename = openSaveDialog();
+    std::string filename = OpenSaveDialog();
     if(!filename.empty()) {
-        if(this->saveToFile(filename)) {
-            this->curFilename = filename;
-            this->scene->undoStack.setClean();
+        if(this->SaveToFile(filename)) {
+            this->cur_filename_ = filename;
+            this->scene_->SetSaved();
         }
     }
 }
@@ -127,7 +127,7 @@ void DocController::saveAs()
 /*
 Helper for the main slots
 */
-bool DocController::saveToFile(const std::string& filename) 
+bool DocController::SaveToFile(const std::string& filename) 
 {
     QFile file(QString::fromStdString(filename));
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
@@ -137,21 +137,21 @@ bool DocController::saveToFile(const std::string& filename)
     }
     QTextStream out(&file);
     std::stringstream ss;
-    ss << this->sceneToXML();
+    ss << this->SceneToXML();
     out << QString::fromStdString(ss.str());
     file.close();
     return true;
 }
 
-std::string DocController::openSaveDialog()
+std::string DocController::OpenSaveDialog()
 {
-    QString fileName = QFileDialog::getSaveFileName(
+    QString filename = QFileDialog::getSaveFileName(
         nullptr, "save file", QString(), "SVG Files (*.svg)"
     );
-    return fileName.toStdString();
+    return filename.toStdString();
 }
 
-void DocController::extract_shapes(const XMLTag& root, std::vector<std::unique_ptr<QAbstractGraphicsShapeItem> >& shapes)
+void DocController::ExtractShapes(const XMLTag& root, std::vector<std::unique_ptr<QAbstractGraphicsShapeItem> >& shapes)
 {
     if(root.is_text) return;
 
@@ -173,19 +173,19 @@ void DocController::extract_shapes(const XMLTag& root, std::vector<std::unique_p
     else if(root.name == "path") {
         shapes.push_back(std::make_unique<FreehandPath>(root));
     }
-    for(const XMLTag& child : root.children)  extract_shapes(child, shapes);
+    for(const XMLTag& child : root.children)  ExtractShapes(child, shapes);
 }
 
-XMLTag DocController::sceneToXML()
+XMLTag DocController::SceneToXML()
 {
     XMLTag root(false);
     root.name = "svg";
-    root.properties["height"] = std::to_string(scene->viewportRect->rect().height());
-    root.properties["width"] = std::to_string(scene->viewportRect->rect().width());
-    for(auto shape : scene->shapes) 
+    root.properties["height"] = std::to_string(scene_->GetViewPortRect()->rect().height());
+    root.properties["width"] = std::to_string(scene_->GetViewPortRect()->rect().width());
+    for(auto shape : scene_->GetDrawnShapes()) 
     {
         Shape* s = dynamic_cast<Shape*>(shape);
-        root.children.push_back(s->toXML());
+        root.children.push_back(s->ToXML());
     }
     return root;
 }

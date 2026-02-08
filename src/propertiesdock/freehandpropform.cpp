@@ -19,30 +19,30 @@ FreehandPropForm::FreehandPropForm(QWidget* parent, GraphicScene* scene, Freehan
     : PropertiesForm(parent, scene)
 {
     // Initialize
-    QVBoxLayout* mainLayout = new QVBoxLayout(this);
-    auto opacity = this->getSlider(path->brush());
-    auto fillColor = this->getColorButton(path->brush().color());
-    auto strokeWidth = this->getSpinBox(path->pen().widthF());
-    auto strokeColor = this->getColorButton(path->pen().color());
+    QVBoxLayout* main_layout = new QVBoxLayout(this);
+    auto opacity = this->GetSlider(path->brush());
+    auto fill_color_btn = this->GetColorButton(path->brush().color());
+    auto stroke_width_sb = this->GetSpinBox(path->pen().widthF());
+    auto stroke_color_btn = this->GetColorButton(path->pen().color());
     // Prevent cycle and update
-    connect(&scene->undoStack, &UndoStack::stackChanged, this, [=]() {
-        this->blockSignals = true;
+    connect(scene->GetUndoStack(), &UndoStack::StackChanged, this, [=]() {
+        this->block_signals = true;
         opacity->setValue(stoi(path->brush().color().name(QColor::HexArgb).toStdString().substr(1, 2), nullptr, 16));
-        fillColor->setStyleSheet(QString("background-color: %1; border: none;").arg(path->brush().color().name()));
-        strokeWidth->setValue(path->pen().widthF());
-        strokeColor->setStyleSheet(QString("background-color: %1; border: none;").arg(path->pen().color().name()));
-        this->blockSignals = false;
+        fill_color_btn->setStyleSheet(QString("background-color: %1; border: none;").arg(path->brush().color().name()));
+        stroke_width_sb->setValue(path->pen().widthF());
+        stroke_color_btn->setStyleSheet(QString("background-color: %1; border: none;").arg(path->pen().color().name()));
+        this->block_signals = false;
     });
     // Trigger actions on change
-    this->implFillColor(path, opacity, fillColor);
-    this->implStrokeStyle(path, strokeWidth, strokeColor);
+    this->ImplFillColor(path, opacity, fill_color_btn);
+    this->ImplStrokeStyle(path, stroke_width_sb, stroke_color_btn);
     // Render
-    auto groupBox1 = new QGroupBox("Styles", this);
-    auto layout1 = new QFormLayout(groupBox1);
-    layout1->addRow(getLabel("Fill opacity"), opacity);
-    layout1->addRow("Fill color", fillColor);
-    layout1->addRow(getLabel("Stroke width"), strokeWidth);
-    layout1->addRow(getLabel("Stroke color"), strokeColor);
-    groupBox1->setLayout(layout1);
-    mainLayout->addWidget(groupBox1);
+    auto style_group_box = new QGroupBox("Styles", this);
+    auto slayout = new QFormLayout(style_group_box);
+    slayout->addRow(GetLabel("Fill opacity"), opacity);
+    slayout->addRow("Fill color", fill_color_btn);
+    slayout->addRow(GetLabel("Stroke width"), stroke_width_sb);
+    slayout->addRow(GetLabel("Stroke color"), stroke_color_btn);
+    style_group_box->setLayout(slayout);
+    main_layout->addWidget(style_group_box);
 }

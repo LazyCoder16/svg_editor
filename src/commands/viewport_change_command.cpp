@@ -3,17 +3,17 @@
 
 
 ViewportChangeCommand::ViewportChangeCommand(QGraphicsRectItem* viewport, float ow, float oh, float w, float h)
-    : viewport(viewport), ow(ow), oh(oh), w(w), h(h)
+    : viewport_(viewport), ow_(ow), oh_(oh), w_(w), h_(h)
 {
     viewport->setRect(QRectF(0, 0, w, h));
 }
 
-void ViewportChangeCommand::undo()
+void ViewportChangeCommand::Undo()
 {
-    viewport->setRect(QRectF(0, 0, ow, oh));
+    viewport_->setRect(QRectF(0, 0, ow_, oh_));
 }
 
-void ViewportChangeCommand::redo()
+void ViewportChangeCommand::Redo()
 {
-    viewport->setRect(QRectF(0, 0, w, h));
+    viewport_->setRect(QRectF(0, 0, w_, h_));
 }

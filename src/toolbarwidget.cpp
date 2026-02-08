@@ -19,25 +19,25 @@ ToolBarWidget::ToolBarWidget(QWidget *parent)
     ui->pushButton_Text->setToolTip("Text Tool");
 
     // Initialize button group
-    buttonGroup = new QButtonGroup(this);
-    buttonGroup->addButton(ui->pushButton_Circle, (int)ToolType::Circle);
-    buttonGroup->addButton(ui->pushButton_Hexagon, (int)ToolType::Hexagon);
-    buttonGroup->addButton(ui->pushButton_Line, (int)ToolType::Line);
-    buttonGroup->addButton(ui->pushButton_Pen, (int)ToolType::Freehand);
-    buttonGroup->addButton(ui->pushButton_Rectangle, (int)ToolType::Rectangle);
-    buttonGroup->addButton(ui->pushButton_Select, (int)ToolType::Select);
-    buttonGroup->addButton(ui->pushButton_Text, (int)ToolType::Text);
+    button_group_ = new QButtonGroup(this);
+    button_group_->addButton(ui->pushButton_Circle, (int)ToolType::Circle);
+    button_group_->addButton(ui->pushButton_Hexagon, (int)ToolType::Hexagon);
+    button_group_->addButton(ui->pushButton_Line, (int)ToolType::Line);
+    button_group_->addButton(ui->pushButton_Pen, (int)ToolType::Freehand);
+    button_group_->addButton(ui->pushButton_Rectangle, (int)ToolType::Rectangle);
+    button_group_->addButton(ui->pushButton_Select, (int)ToolType::Select);
+    button_group_->addButton(ui->pushButton_Text, (int)ToolType::Text);
 
     // Make every button checkable and add exclusive attribute to button group
-    for(QAbstractButton *button : buttonGroup->buttons())
+    for(QAbstractButton *button : button_group_->buttons())
     {
         button->setCheckable(true);
     }
-    buttonGroup->setExclusive(true);
+    button_group_->setExclusive(true);
 
-    connect(buttonGroup, &QButtonGroup::idToggled, this, [=](int id, bool checked) {
+    connect(button_group_, &QButtonGroup::idToggled, this, [=](int id, bool checked) {
         if(checked) {
-            emit toolChanged((ToolType)id);
+            emit ToolChanged((ToolType)id);
         }
     });
     ui->pushButton_Select->setChecked(true);

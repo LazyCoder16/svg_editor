@@ -13,7 +13,7 @@ CanvasWidget::CanvasWidget(QWidget* parent)
     this->setBackgroundBrush(QBrush(QColor::fromString("#888888")));
 }
 
-void CanvasWidget::centreOn(float x, float y)
+void CanvasWidget::CentreOn(float x, float y)
 {
     this->centerOn(x, y);
 }
@@ -30,7 +30,7 @@ void CanvasWidget::mouseMoveEvent(QMouseEvent *event)
 {
     QGraphicsView::mouseMoveEvent(event);
     QPointF pos = this->mapToScene(event->pos());
-    emit mousePosition(pos.x(), pos.y());
+    emit MousePosition(pos.x(), pos.y());
 }
 
 /*

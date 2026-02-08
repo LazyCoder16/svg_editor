@@ -2,17 +2,17 @@
 #include <QtCore/qpoint.h>
 
 MoveShapeCommand::MoveShapeCommand(QGraphicsItem* item, QPointF startPos, QPointF endPos)
-    : item(item), startPos(startPos), endPos(endPos)
+    : item_(item), start_pos_(startPos), end_pos_(endPos)
 {
     item->setPos(endPos);
 }
 
-void MoveShapeCommand::undo()
+void MoveShapeCommand::Undo()
 {
-    item->setPos(startPos);
+    item_->setPos(start_pos_);
 }
 
-void MoveShapeCommand::redo()
+void MoveShapeCommand::Redo()
 {
-    item->setPos(endPos);
+    item_->setPos(end_pos_);
 }

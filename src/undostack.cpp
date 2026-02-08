@@ -6,63 +6,63 @@
 
 
 UndoStack::UndoStack() {
-    setClean();
+    SetClean();
 }
 
-void UndoStack::addAction(std::unique_ptr<Command> action)
+void UndoStack::AddAction(std::unique_ptr<Command> action)
 {
-    undo_stack.push(std::move(action));
-    while(!redo_stack.empty()) redo_stack.pop();
-    if(counter < 0) {
-        counter = INT_MIN;
+    undo_stack_.push(std::move(action));
+    while(!redo_stack_.empty()) redo_stack_.pop();
+    if(counter_ < 0) {
+        counter_ = INT_MIN;
     }
     else {
-        ++counter;
+        ++counter_;
     }
-    emit stackChanged();
+    emit StackChanged();
 }
 
-void UndoStack::reset()
+void UndoStack::Reset()
 {
-    while(!undo_stack.empty()) undo_stack.pop();
-    while(!redo_stack.empty()) redo_stack.pop();
-    setClean();
-    emit stackChanged();
+    while(!undo_stack_.empty()) undo_stack_.pop();
+    while(!redo_stack_.empty()) redo_stack_.pop();
+    SetClean();
+    emit StackChanged();
 }
 
-void UndoStack::undo()
+void UndoStack::Undo()
 {
-    if(!undo_stack.empty())
+    if(!undo_stack_.empty())
     {
-        undo_stack.top()->undo();
-        redo_stack.push(std::move(undo_stack.top()));
-        undo_stack.pop();
-        if(counter != INT_MIN) {
-            --counter;
+        undo_stack_.top()->Undo();
+        redo_stack_.push(std::move(undo_stack_.top()));
+        undo_stack_.pop();
+        if(counter_ != INT_MIN) {
+            --counter_;
         }
-        emit stackChanged();
+        emit StackChanged();
     }
 }
 
-void UndoStack::redo()
+void UndoStack::Redo()
 {
-    if(!redo_stack.empty())
+    if(!redo_stack_.empty())
     {
-        redo_stack.top()->redo();
-        undo_stack.push(std::move(redo_stack.top()));
-        redo_stack.pop();
-        if(counter != INT_MIN) {
-            ++counter;
+        redo_stack_.top()->Redo();
+        undo_stack_.push(std::move(redo_stack_.top()));
+        redo_stack_.pop();
+        if(counter_ != INT_MIN) {
+            ++counter_;
         }
-        emit stackChanged();
+        emit StackChanged();
     }
 }
 
-bool UndoStack::isClean() {
-    return counter == 0;
+bool UndoStack::IsClean() {
+    return counter_ == 0;
 }
 
-void UndoStack::setClean() {
-    counter = 0;
-    emit stackChanged();
+void UndoStack::SetClean() {
+    counter_ = 0;
+    emit StackChanged();
 }

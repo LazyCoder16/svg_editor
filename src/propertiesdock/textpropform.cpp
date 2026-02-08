@@ -23,71 +23,77 @@
 
 
 TextPropForm::TextPropForm(QWidget* parent, GraphicScene* scene, TextShape* shape)
-    : PropertiesForm(parent, scene), shape(shape)
+    : PropertiesForm(parent, scene), shape_(shape)
 {
     // Initialize
-    QVBoxLayout* mainLayout = new QVBoxLayout(this);
-    this->old = shape->toXML();
-    auto fontSize = this->getSpinBox(shape->font().pointSizeF(), false, "pt");
-    auto opacity = this->getSlider(shape->brush());
-    auto fillColor = this->getColorButton(shape->brush().color());
-    auto strokeWidth = this->getSpinBox(shape->pen().widthF());
-    auto strokeColor = this->getColorButton(shape->pen().color());
-    auto textEdit = new QPlainTextEdit(this);
+    QVBoxLayout* main_layout = new QVBoxLayout(this);
+    this->old_ = shape->ToXML();
+    auto font_size = this->GetSpinBox(shape->font().pointSizeF(), false, "pt");
+    auto opacity = this->GetSlider(shape->brush());
+    auto fill_color_btn = this->GetColorButton(shape->brush().color());
+    auto stroke_width_sb = this->GetSpinBox(shape->pen().widthF());
+    auto stroke_color_btn = this->GetColorButton(shape->pen().color());
+    auto text_edit = new QPlainTextEdit(this);
     if(shape->pen().style() == Qt::NoPen) {
-        strokeWidth->setValue(0);
+        stroke_width_sb->setValue(0);
     }
-    textEdit->setPlainText(shape->text());
-    textEdit->setFixedHeight(100);
-    textEdit->setFixedWidth(150);
+    text_edit->setPlainText(shape->text());
+    text_edit->setFixedHeight(100);
+    text_edit->setFixedWidth(150);
 
     // Prevent cycle and update
-    connect(&scene->undoStack, &UndoStack::stackChanged, this, [=]() {
-        this->blockSignals = true;
-        fontSize->setValue(shape->font().pointSizeF());
+    connect(scene->GetUndoStack(), &UndoStack::StackChanged, this, [=]() {
+        this->block_signals = true;
+        font_size->setValue(shape->font().pointSizeF());
         opacity->setValue(stoi(shape->brush().color().name(QColor::HexArgb).toStdString().substr(1, 2), nullptr, 16));
-        fillColor->setStyleSheet(QString("background-color: %1; border: none;").arg(shape->brush().color().name()));
-        strokeWidth->setValue(shape->pen().widthF());
+        fill_color_btn->setStyleSheet(QString("background-color: %1; border: none;").arg(shape->brush().color().name()));
+        stroke_width_sb->setValue(shape->pen().widthF());
         if(shape->pen().style() == Qt::NoPen) {
-            strokeWidth->setValue(0);
+            stroke_width_sb->setValue(0);
         }
-        strokeColor->setStyleSheet(QString("background-color: %1; border: none;").arg(shape->pen().color().name()));
-        this->blockSignals = false;
+        stroke_color_btn->setStyleSheet(QString("background-color: %1; border: none;").arg(shape->pen().color().name()));
+        this->block_signals = false;
     });
     // Trigger actions on change
-    this->implSpinBoxChange(shape, fontSize, "font-size");
-    this->implFillColor(shape, opacity, fillColor);
-    this->implStrokeStyle(shape, strokeWidth, strokeColor);
-    connect(textEdit, &QPlainTextEdit::textChanged, this, [=]() {
-        if(blockSignals) return;
-        shape->setText(textEdit->toPlainText());
+    this->ImplSpinBoxChange(shape, font_size, "font-size");
+    this->ImplFillColor(shape, opacity, fill_color_btn);
+    this->ImplStrokeStyle(shape, stroke_width_sb, stroke_color_btn);
+    connect(text_edit, &QPlainTextEdit::textChanged, this, [=]() {
+        if(block_signals) return;
+        shape->setText(text_edit->toPlainText());
     });
     connect(qApp, &QApplication::focusChanged, this, [=](QWidget* before, QWidget* now) {
-        if(now == textEdit) {
-            this->old = shape->toXML();
+        if(now == text_edit) {
+            this->old_ = shape->ToXML();
         }
-        else if(before == textEdit) {
-            XMLTag cur = old;
-            cur.children[0].name = textEdit->toPlainText().toStdString();
-            this->addXMLAction(shape, old, cur);
+        else if(before == text_edit) {
+            SaveCurChanges();
         }
     });
     // Render
-    auto groupBox = new QGroupBox("Text", this);
-    auto layout = new QFormLayout(groupBox);
-    layout->addRow(getLabel("Font Size"), fontSize);
-    layout->addRow(getLabel("Text"), textEdit);
-    auto groupBox1 = new QGroupBox("Styles", this);
-    auto layout1 = new QFormLayout(groupBox1);
-    layout1->addRow(getLabel("Fill opacity"), opacity);
-    layout1->addRow("Fill color", fillColor);
-    layout1->addRow(getLabel("Stroke width"), strokeWidth);
-    layout1->addRow(getLabel("Stroke color"), strokeColor);
-    groupBox->setLayout(layout);
-    groupBox1->setLayout(layout1);
-    mainLayout->addWidget(groupBox);
-    mainLayout->addWidget(groupBox1);
-    mainLayout->addStretch();
+    auto text_group_box = new QGroupBox("Text", this);
+    auto tlayout = new QFormLayout(text_group_box);
+    tlayout->addRow(GetLabel("Font Size"), font_size);
+    tlayout->addRow(GetLabel("Text"), text_edit);
+    auto styles_group_box = new QGroupBox("Styles", this);
+    auto slayout = new QFormLayout(styles_group_box);
+    slayout->addRow(GetLabel("Fill opacity"), opacity);
+    slayout->addRow("Fill color", fill_color_btn);
+    slayout->addRow(GetLabel("Stroke width"), stroke_width_sb);
+    slayout->addRow(GetLabel("Stroke color"), stroke_color_btn);
+    text_group_box->setLayout(tlayout);
+    styles_group_box->setLayout(slayout);
+    main_layout->addWidget(text_group_box);
+    main_layout->addWidget(styles_group_box);
+    main_layout->addStretch();
+}
+
+void TextPropForm::SaveCurChanges()
+{
+    XMLTag cur = shape_->ToXML();
+    if(cur.children[0].name != old_.children[0].name) {
+        AddXMLAction(shape_, old_, cur);
+    }
 }
 
 

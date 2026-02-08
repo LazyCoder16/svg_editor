@@ -21,8 +21,8 @@ class Command
 {
 public:
     virtual ~Command() {} // Inheritence safety
-    virtual void undo() = 0;
-    virtual void redo() = 0;
+    virtual void Undo() = 0;
+    virtual void Redo() = 0;
 };
 
 /*
@@ -32,13 +32,13 @@ class AddDeleteShapeCommand : public Command
 {  
 public:
     AddDeleteShapeCommand(std::vector<QAbstractGraphicsShapeItem*> items, GraphicScene *scene, bool added);
-    void undo() override;
-    void redo() override;
+    void Undo() override;
+    void Redo() override;
 
 private:
-    std::vector<QAbstractGraphicsShapeItem*> items;
-    GraphicScene *scene;
-    bool added;
+    std::vector<QAbstractGraphicsShapeItem*> items_;
+    GraphicScene *scene_;
+    bool added_;
 };
 
 /*
@@ -48,13 +48,13 @@ class MoveShapeCommand : public Command
 {
 public:
     MoveShapeCommand(QGraphicsItem* item, QPointF startPos, QPointF endPos);
-    void undo() override;
-    void redo() override;
+    void Undo() override;
+    void Redo() override;
 
 private:
-    QGraphicsItem* item;
-    QPointF startPos;
-    QPointF endPos;
+    QGraphicsItem* item_;
+    QPointF start_pos_;
+    QPointF end_pos_;
 };
 
 
@@ -62,12 +62,12 @@ class ViewportChangeCommand : public Command
 {
 public:
     ViewportChangeCommand(QGraphicsRectItem* viewport, float ow, float oh, float w, float h);
-    void undo() override;
-    void redo() override;
+    void Undo() override;
+    void Redo() override;
 
 private:
-    QGraphicsRectItem *viewport;
-    float ow, oh, w, h;
+    QGraphicsRectItem *viewport_;
+    float ow_, oh_, w_, h_;
 };
 
 
@@ -75,12 +75,12 @@ class ShapeXMLCommand : public Command
 {
 public:
     ShapeXMLCommand(Shape* shape, const XMLTag& old, const XMLTag& cur);
-    void undo() override;
-    void redo() override;
+    void Undo() override;
+    void Redo() override;
 
 private:
-    Shape* shape;
-    XMLTag old, cur;
+    Shape* shape_;
+    XMLTag old_, cur_;
 };
 
 #endif // COMMAND_H

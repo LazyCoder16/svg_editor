@@ -1,3 +1,4 @@
+#include "propertiesdock.h"
 #include "xmlparser.h"
 #include "shapes.h"
 #include <QGraphicsItem>
@@ -19,22 +20,22 @@ Line::Line(float x1, float y1, float x2, float y2)
 Line::Line(const XMLTag& xml)
     : QGraphicsPolygonItem()
 {
-    this->updateFromXML(xml);
+    this->UpdateFromXML(xml);
     this->setFlags(QGraphicsItem::ItemSendsGeometryChanges);
 }
 
 
-void Line::updateFromXML(const XMLTag& xml)
+void Line::UpdateFromXML(const XMLTag& xml)
 {
     this->setPolygon(QPolygonF(QList<QPointF> {
         QPointF(std::stof(xml.properties.at("x1")), std::stof(xml.properties.at("y1"))), 
         QPointF(std::stof(xml.properties.at("x2")), std::stof(xml.properties.at("y2")))
     }));
-    this->loadStylesFromXML(this, xml);
+    this->LoadStylesFromXML(this, xml);
 }
 
 
-XMLTag Line::toXML() const
+XMLTag Line::ToXML() const
 {
     XMLTag xml(false);
     xml.name = "line";
@@ -45,14 +46,22 @@ XMLTag Line::toXML() const
     xml.properties["y1"] = std::to_string(p1.y());
     xml.properties["x2"] = std::to_string(p2.x());
     xml.properties["y2"] = std::to_string(p2.y());
-    this->addStylesToXML(this, xml);
+    this->AddStylesToXML(this, xml);
     return xml;
 }
 
 
-void Line::updateShapeOnDraw(QPointF start, QPointF cur)
+void Line::UpdateShapeOnDraw(QPointF start, QPointF cur)
 {
     this->setPolygon(QPolygonF(QList<QPointF> {
         start, cur
     }));
 }
+
+PropertiesForm* Line::GetPropertyForm(QWidget* parent)
+{
+    return new LinePropForm(parent, static_cast<GraphicScene*>(this->scene()), this);
+}
+
+
+

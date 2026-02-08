@@ -11,10 +11,10 @@ public:
     CanvasWidget(QWidget *parent = nullptr);
 
 public slots:
-    void centreOn(float x, float y);
+    void CentreOn(float x, float y);
 
 signals:
-    void mousePosition(int x, int y);
+    void MousePosition(int x, int y);
 
 protected:
     //void mousePressEvent(QMouseEvent* event) override;
@@ -22,7 +22,7 @@ protected:
     //void mouseReleaseEvent(QMouseEvent* event) override;
 
 private:
-    QPointF top_left;
+    QPointF top_left_;
 };
 
 #endif // CANVASWIDGET_H

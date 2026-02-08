@@ -24,14 +24,14 @@ public:
     ~MainWindow();
 
 private slots:
-    void setMousePosition(int x, int y);
+    void SetMousePosition(int x, int y);
 
 protected:
     void closeEvent(QCloseEvent* event) override;
 
 private:
     Ui::MainWindow *ui;
-    DocController *docController;
-    GraphicScene *scene;
+    DocController *doc_controller_;
+    GraphicScene *scene_;
 };
 #endif // MAINWINDOW_H

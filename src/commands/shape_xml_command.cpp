@@ -2,17 +2,17 @@
 
 
 ShapeXMLCommand::ShapeXMLCommand(Shape* shape, const XMLTag& old, const XMLTag& cur)
-    : shape(shape), old(old), cur(cur)
+    : shape_(shape), old_(old), cur_(cur)
 {
-    shape->updateFromXML(cur);
+    shape->UpdateFromXML(cur);
 }
 
-void ShapeXMLCommand::undo()
+void ShapeXMLCommand::Undo()
 {
-    shape->updateFromXML(old);
+    shape_->UpdateFromXML(old_);
 }
 
-void ShapeXMLCommand::redo()
+void ShapeXMLCommand::Redo()
 {
-    shape->updateFromXML(cur);
+    shape_->UpdateFromXML(cur_);
 }

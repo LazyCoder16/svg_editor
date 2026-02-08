@@ -19,38 +19,38 @@ CirclePropForm::CirclePropForm(QWidget* parent, GraphicScene* scene, Circle* cir
     : PropertiesForm(parent, scene)
 {
     // Initialize
-    QVBoxLayout* mainLayout = new QVBoxLayout(this);
-    auto radius = this->getSpinBox(circle->rect().width());
-    auto opacity = this->getSlider(circle->brush());
-    auto fillColor = this->getColorButton(circle->brush().color());
-    auto strokeWidth = this->getSpinBox(circle->pen().widthF());
-    auto strokeColor = this->getColorButton(circle->pen().color());
+    QVBoxLayout* main_layout = new QVBoxLayout(this);
+    auto radius = this->GetSpinBox(circle->rect().width());
+    auto opacity = this->GetSlider(circle->brush());
+    auto fill_color_btn = this->GetColorButton(circle->brush().color());
+    auto stroke_width_sb = this->GetSpinBox(circle->pen().widthF());
+    auto stroke_color_btn = this->GetColorButton(circle->pen().color());
     // Prevent cycle and update
-    connect(&scene->undoStack, &UndoStack::stackChanged, this, [=]() {
-        this->blockSignals = true;
+    connect(scene->GetUndoStack(), &UndoStack::StackChanged, this, [=]() {
+        this->block_signals = true;
         radius->setValue(circle->rect().width()/2);
         opacity->setValue(stoi(circle->brush().color().name(QColor::HexArgb).toStdString().substr(1, 2), nullptr, 16));
-        fillColor->setStyleSheet(QString("background-color: %1; border: none;").arg(circle->brush().color().name()));
-        strokeWidth->setValue(circle->pen().widthF());
-        strokeColor->setStyleSheet(QString("background-color: %1; border: none;").arg(circle->pen().color().name()));
-        this->blockSignals = false;
+        fill_color_btn->setStyleSheet(QString("background-color: %1; border: none;").arg(circle->brush().color().name()));
+        stroke_width_sb->setValue(circle->pen().widthF());
+        stroke_color_btn->setStyleSheet(QString("background-color: %1; border: none;").arg(circle->pen().color().name()));
+        this->block_signals = false;
     });
     // Trigger actions on change
-    this->implSpinBoxChange(circle, radius, "r");
-    this->implFillColor(circle, opacity, fillColor);
-    this->implStrokeStyle(circle, strokeWidth, strokeColor);
+    this->ImplSpinBoxChange(circle, radius, "r");
+    this->ImplFillColor(circle, opacity, fill_color_btn);
+    this->ImplStrokeStyle(circle, stroke_width_sb, stroke_color_btn);
     // Render
-    auto groupBox = new QGroupBox("Geometry", this);
-    auto layout = new QFormLayout(groupBox);
-    layout->addRow(getLabel("Radius"), radius);
-    auto groupBox1 = new QGroupBox("Styles", this);
-    auto layout1 = new QFormLayout(groupBox1);
-    layout1->addRow(getLabel("Fill opacity"), opacity);
-    layout1->addRow("Fill color", fillColor);
-    layout1->addRow(getLabel("Stroke width"), strokeWidth);
-    layout1->addRow(getLabel("Stroke color"), strokeColor);
-    groupBox->setLayout(layout);
-    groupBox1->setLayout(layout1);
-    mainLayout->addWidget(groupBox);
-    mainLayout->addWidget(groupBox1);
+    auto geo_group_box = new QGroupBox("Geometry", this);
+    auto glayout = new QFormLayout(geo_group_box);
+    glayout->addRow(GetLabel("Radius"), radius);
+    auto styles_group_box = new QGroupBox("Styles", this);
+    auto slayout = new QFormLayout(styles_group_box);
+    slayout->addRow(GetLabel("Fill opacity"), opacity);
+    slayout->addRow("Fill color", fill_color_btn);
+    slayout->addRow(GetLabel("Stroke width"), stroke_width_sb);
+    slayout->addRow(GetLabel("Stroke color"), stroke_color_btn);
+    geo_group_box->setLayout(glayout);
+    styles_group_box->setLayout(slayout);
+    main_layout->addWidget(geo_group_box);
+    main_layout->addWidget(styles_group_box);
 }

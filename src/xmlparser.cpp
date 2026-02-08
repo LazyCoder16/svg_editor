@@ -10,7 +10,7 @@ XMLTag::XMLTag(bool is_text)
 {}
 
 
-int skip_xml_header(const std::string &content) {
+int SkipXmlHeader(const std::string &content) {
     // Returns position of first character after skipping xml header and whitespaces
     // Returns content.size() if there is an error in parsing the header
     int pos = 0;
@@ -19,20 +19,20 @@ int skip_xml_header(const std::string &content) {
     if(pos >= len || content[pos] != '<') return len;
     if(pos+1 < len && content[pos+1] == '?') {
         // We ignore any further errors and simply search for ?>
-        int headerEnd = content.find("?>", pos);
-        if(headerEnd == std::string::npos) return len;
-        pos = headerEnd + 2;
+        int header_end = content.find("?>", pos);
+        if(header_end == std::string::npos) return len;
+        pos = header_end + 2;
         while(pos < len && std::isspace(content[pos])) { ++pos; }
         if(pos >= len || content[pos] != '<') return len;
     }
     return pos;
 }
 
-bool XMLParser::parse_file(const std::string &content, XMLTag &root)
+bool XMLParser::ParseFile(const std::string &content, XMLTag &root)
 {
     std::stack<XMLTag*> st;
     st.push(&root);
-    int pos = skip_xml_header(content) + 1;
+    int pos = SkipXmlHeader(content) + 1;
     
     enum State { StartTag, Attr, CloseTag };
     State state = StartTag;

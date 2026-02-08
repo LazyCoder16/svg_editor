@@ -21,7 +21,7 @@ struct XMLTag
 struct XMLParser
 {
     // Parses a file and populates its xml content to the root XMLTag. Returns false in case the file is not valid.
-    static bool parse_file(const std::string& content, XMLTag& root);
+    static bool ParseFile(const std::string& content, XMLTag& root);
 };
 
 std::ostream& operator<<(std::ostream& os, const XMLTag& tag);

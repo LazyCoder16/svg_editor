@@ -19,10 +19,10 @@ public:
     ~ToolBarWidget();
 
 signals:
-    void toolChanged(ToolType newTool);
+    void ToolChanged(ToolType newTool);
 
 private:
-    QButtonGroup *buttonGroup;
+    QButtonGroup *button_group_;
 };
 
 #endif // TOOLBARWIDGET_H

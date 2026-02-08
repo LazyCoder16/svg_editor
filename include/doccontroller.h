@@ -13,25 +13,27 @@ class DocController : public QObject
     Q_OBJECT
 public:
     explicit DocController(QObject *parent = nullptr);
-    void setScene(GraphicScene* scene);
-    bool discardChangesDialog();
-    std::string curFilename;
-    static void extract_shapes(const XMLTag& root, std::vector<std::unique_ptr<QAbstractGraphicsShapeItem> >& shapes);
+    void SetScene(GraphicScene* scene);
+    bool DiscardChangesDialog();
+    static void ExtractShapes(const XMLTag& root, std::vector<std::unique_ptr<QAbstractGraphicsShapeItem> >& shapes);
+    void SetCurFilename(const std::string& filename) { cur_filename_ = filename; }
+    std::string GetCurFilename() { return cur_filename_; }
 
 signals:
-    void setWindowTitle(const QString& title);
+    void SetWindowTitle(const QString& title);
 
 public slots:
-    void openFile();
-    void newFile();
-    void saveFile();
-    void saveAs();
+    void OpenFile();
+    void NewFile();
+    void SaveFile();
+    void SaveAs();
 
 private:
-    XMLTag sceneToXML();
-    bool saveToFile(const std::string& filename);
-    std::string openSaveDialog();
-    GraphicScene* scene;
+    XMLTag SceneToXML();
+    bool SaveToFile(const std::string& filename);
+    std::string OpenSaveDialog();
+    GraphicScene* scene_;
+    std::string cur_filename_;
 };
 
 #endif // DOCCONTROLLER_H

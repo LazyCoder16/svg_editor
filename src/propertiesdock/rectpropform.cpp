@@ -19,50 +19,50 @@ RectPropForm::RectPropForm(QWidget* parent, GraphicScene* scene, Rectangle* rect
     : PropertiesForm(parent, scene)
 {
     // Initialize
-    QVBoxLayout* mainLayout = new QVBoxLayout(this);
-    auto width = this->getSpinBox(rect->rect().width());
-    auto height = this->getSpinBox(rect->rect().height());
-    auto rx = this->getSpinBox(rect->rx);
-    auto ry = this->getSpinBox(rect->ry);
-    auto opacity = this->getSlider(rect->brush());
-    auto fillColor = this->getColorButton(rect->brush().color());
-    auto strokeWidth = this->getSpinBox(rect->pen().widthF());
-    auto strokeColor = this->getColorButton(rect->pen().color());
+    QVBoxLayout* main_layout = new QVBoxLayout(this);
+    auto width = this->GetSpinBox(rect->rect().width());
+    auto height = this->GetSpinBox(rect->rect().height());
+    auto rx = this->GetSpinBox(rect->rx);
+    auto ry = this->GetSpinBox(rect->ry);
+    auto opacity = this->GetSlider(rect->brush());
+    auto fill_color_btn = this->GetColorButton(rect->brush().color());
+    auto stroke_width_sb = this->GetSpinBox(rect->pen().widthF());
+    auto stroke_color_btn = this->GetColorButton(rect->pen().color());
     // Prevent cycle and update
-    connect(&scene->undoStack, &UndoStack::stackChanged, this, [=]() {
-        this->blockSignals = true;
+    connect(scene->GetUndoStack(), &UndoStack::StackChanged, this, [=]() {
+        this->block_signals = true;
         width->setValue(rect->rect().width());
         height->setValue(rect->rect().height());
         rx->setValue(rect->rx);
         ry->setValue(rect->ry);
         opacity->setValue(stoi(rect->brush().color().name(QColor::HexArgb).toStdString().substr(1, 2), nullptr, 16));
-        fillColor->setStyleSheet(QString("background-color: %1; border: none;").arg(rect->brush().color().name()));
-        strokeWidth->setValue(rect->pen().widthF());
-        strokeColor->setStyleSheet(QString("background-color: %1; border: none;").arg(rect->pen().color().name()));
-        this->blockSignals = false;
+        fill_color_btn->setStyleSheet(QString("background-color: %1; border: none;").arg(rect->brush().color().name()));
+        stroke_width_sb->setValue(rect->pen().widthF());
+        stroke_color_btn->setStyleSheet(QString("background-color: %1; border: none;").arg(rect->pen().color().name()));
+        this->block_signals = false;
     });
     // Trigger actions on change
-    this->implSpinBoxChange(rect, width, "width");
-    this->implSpinBoxChange(rect, height, "height");
-    this->implSpinBoxChange(rect, rx, "rx");
-    this->implSpinBoxChange(rect, ry, "ry");
-    this->implFillColor(rect, opacity, fillColor);
-    this->implStrokeStyle(rect, strokeWidth, strokeColor);
+    this->ImplSpinBoxChange(rect, width, "width");
+    this->ImplSpinBoxChange(rect, height, "height");
+    this->ImplSpinBoxChange(rect, rx, "rx");
+    this->ImplSpinBoxChange(rect, ry, "ry");
+    this->ImplFillColor(rect, opacity, fill_color_btn);
+    this->ImplStrokeStyle(rect, stroke_width_sb, stroke_color_btn);
     // Render
-    auto groupBox = new QGroupBox("Geometry", this);
-    auto layout = new QFormLayout(groupBox);
-    layout->addRow(getLabel("Width"), width);
-    layout->addRow(getLabel("Height"), height);
-    layout->addRow(getLabel("Radius X"), rx);
-    layout->addRow(getLabel("Radius Y"), ry);
-    auto groupBox1 = new QGroupBox("Styles", this);
-    auto layout1 = new QFormLayout(groupBox1);
-    layout1->addRow(getLabel("Fill opacity"), opacity);
-    layout1->addRow("Fill color", fillColor);
-    layout1->addRow(getLabel("Stroke width"), strokeWidth);
-    layout1->addRow(getLabel("Stroke color"), strokeColor);
-    groupBox->setLayout(layout);
-    groupBox1->setLayout(layout1);
-    mainLayout->addWidget(groupBox);
-    mainLayout->addWidget(groupBox1);
+    auto geo_group_box = new QGroupBox("Geometry", this);
+    auto glayout = new QFormLayout(geo_group_box);
+    glayout->addRow(GetLabel("Width"), width);
+    glayout->addRow(GetLabel("Height"), height);
+    glayout->addRow(GetLabel("Radius X"), rx);
+    glayout->addRow(GetLabel("Radius Y"), ry);
+    auto styles_group_box = new QGroupBox("Styles", this);
+    auto slayout = new QFormLayout(styles_group_box);
+    slayout->addRow(GetLabel("Fill opacity"), opacity);
+    slayout->addRow("Fill color", fill_color_btn);
+    slayout->addRow(GetLabel("Stroke width"), stroke_width_sb);
+    slayout->addRow(GetLabel("Stroke color"), stroke_color_btn);
+    geo_group_box->setLayout(glayout);
+    styles_group_box->setLayout(slayout);
+    main_layout->addWidget(geo_group_box);
+    main_layout->addWidget(styles_group_box);
 }

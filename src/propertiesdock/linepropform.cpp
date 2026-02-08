@@ -19,23 +19,23 @@ LinePropForm::LinePropForm(QWidget* parent, GraphicScene* scene, Line* line)
     : PropertiesForm(parent, scene)
 {
     // Initialize
-    QVBoxLayout* mainLayout = new QVBoxLayout(this);
-    auto strokeWidth = this->getSpinBox(line->pen().widthF());
-    auto strokeColor = this->getColorButton(line->pen().color());
+    QVBoxLayout* main_layout = new QVBoxLayout(this);
+    auto stroke_width_sb = this->GetSpinBox(line->pen().widthF());
+    auto stroke_color_btn = this->GetColorButton(line->pen().color());
     // Prevent cycle and update
-    connect(&scene->undoStack, &UndoStack::stackChanged, this, [=]() {
-        this->blockSignals = true;
-        strokeWidth->setValue(line->pen().widthF());
-        strokeColor->setStyleSheet(QString("background-color: %1; border: none;").arg(line->pen().color().name()));
-        this->blockSignals = false;
+    connect(scene->GetUndoStack(), &UndoStack::StackChanged, this, [=]() {
+        this->block_signals = true;
+        stroke_width_sb->setValue(line->pen().widthF());
+        stroke_color_btn->setStyleSheet(QString("background-color: %1; border: none;").arg(line->pen().color().name()));
+        this->block_signals = false;
     });
     // Trigger actions on change
-    this->implStrokeStyle(line, strokeWidth, strokeColor);
+    this->ImplStrokeStyle(line, stroke_width_sb, stroke_color_btn);
     // Render
-    auto groupBox1 = new QGroupBox("Styles", this);
-    auto layout1 = new QFormLayout(groupBox1);
-    layout1->addRow(getLabel("Stroke width"), strokeWidth);
-    layout1->addRow(getLabel("Stroke color"), strokeColor);
-    groupBox1->setLayout(layout1);
-    mainLayout->addWidget(groupBox1);
+    auto styles_group_box = new QGroupBox("Styles", this);
+    auto slayout = new QFormLayout(styles_group_box);
+    slayout->addRow(GetLabel("Stroke width"), stroke_width_sb);
+    slayout->addRow(GetLabel("Stroke color"), stroke_color_btn);
+    styles_group_box->setLayout(slayout);
+    main_layout->addWidget(styles_group_box);
 }

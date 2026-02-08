@@ -1,3 +1,4 @@
+#include "propertiesdock.h"
 #include "xmlparser.h"
 #include "shapes.h"
 #include <QGraphicsItem>
@@ -12,7 +13,7 @@
 #include <sstream>
 
 
-QPainterPath parseSVGPath(const std::string& d) {
+QPainterPath ParseSVGPath(const std::string& d) {
     QPainterPath path;
     std::stringstream ss(d);
     char command = 'M';
@@ -49,17 +50,17 @@ FreehandPath::FreehandPath(const QPainterPath& path)
 FreehandPath::FreehandPath(const XMLTag& xml)
     : QGraphicsPathItem()
 {
-    this->updateFromXML(xml);
+    this->UpdateFromXML(xml);
     this->setFlags(QGraphicsItem::ItemSendsGeometryChanges);
 }
 
-void FreehandPath::updateFromXML(const XMLTag& xml)
+void FreehandPath::UpdateFromXML(const XMLTag& xml)
 {
-    this->setPath(parseSVGPath(xml.properties.at("d")));
-    this->loadStylesFromXML(this, xml);
+    this->setPath(ParseSVGPath(xml.properties.at("d")));
+    this->LoadStylesFromXML(this, xml);
 }
 
-XMLTag FreehandPath::toXML() const
+XMLTag FreehandPath::ToXML() const
 {
     XMLTag xml(false);
     xml.name = "path";
@@ -74,12 +75,12 @@ XMLTag FreehandPath::toXML() const
         xml_path += std::to_string(point.x()) + " " + std::to_string(point.y()) + " ";
     }
     xml.properties["d"] = xml_path;
-    this->addStylesToXML(this, xml);
+    this->AddStylesToXML(this, xml);
     return xml;
 }
 
 
-void FreehandPath::updateShapeOnDraw(QPointF start, QPointF cur)
+void FreehandPath::UpdateShapeOnDraw(QPointF start, QPointF cur)
 {
     auto path = this->path();
     if(path.elementCount() == 0) {
@@ -88,3 +89,9 @@ void FreehandPath::updateShapeOnDraw(QPointF start, QPointF cur)
     path.lineTo(cur);
     this->setPath(path);
 }
+
+PropertiesForm* FreehandPath::GetPropertyForm(QWidget* parent)
+{
+    return new FreehandPropForm(parent, static_cast<GraphicScene*>(this->scene()), this);
+}
+
