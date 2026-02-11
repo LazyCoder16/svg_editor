@@ -102,6 +102,7 @@ void GraphicScene::AddDeletedShape(QAbstractGraphicsShapeItem* shape)
 
 void GraphicScene::DeleteSelectedItem()
 {
+    if(this->selectedItems().empty()) return;
     std::vector<QAbstractGraphicsShapeItem*> shapes;
     for(auto item : this->selectedItems())
     {
