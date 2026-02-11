@@ -63,10 +63,13 @@ TextPropForm::TextPropForm(QWidget* parent, GraphicScene* scene, TextShape* shap
         shape->setText(text_edit->toPlainText());
     });
     connect(qApp, &QApplication::focusChanged, this, [=](QWidget* before, QWidget* now) {
+        // Only add to the stack when the textEdit goes out of focus
         if(now == text_edit) {
+            // Must mean it came into focus
             this->old_ = shape->ToXML();
         }
         else if(before == text_edit) {
+            // Must mean it went out of focus after editing
             SaveCurChanges();
         }
     });
@@ -99,5 +102,6 @@ void TextPropForm::SaveCurChanges()
 
 TextPropForm::~TextPropForm()
 {
+    // Important to disconnect this signal
     disconnect(qApp, nullptr, this, nullptr);
 }

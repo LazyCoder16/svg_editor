@@ -23,7 +23,7 @@ public:
     virtual ~Shape() {}
     virtual XMLTag ToXML() const = 0;
     virtual void UpdateFromXML(const XMLTag& xml) = 0;
-    virtual void UpdateShapeOnDraw(QPointF start, QPointF cur) {}
+    virtual void UpdateShapeOnDraw(QPointF start, QPointF cur) {} // Update the live shape given the initial and final position of the user mouse when dragging
     virtual PropertiesForm* GetPropertyForm(QWidget* parent) = 0;
 
     static void AddStylesToXML(const QAbstractGraphicsShapeItem* item, XMLTag& xml);
@@ -36,6 +36,7 @@ public:
 
 /*
 Children classes inheriting from Shape and QAbstractGraphicsShapeItem class for rendering
+Implements the virtual functions of Shape class
 */
 class Rectangle : public Shape, public QGraphicsRectItem
 {

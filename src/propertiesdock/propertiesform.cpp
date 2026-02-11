@@ -25,11 +25,13 @@ PropertiesForm::PropertiesForm(QWidget* parent, GraphicScene* scene)
 
 void PropertiesForm::AddCommand(std::unique_ptr<Command> command)
 {
+    // Add a command to the Undo stack
     this->scene_->AddAction(std::move(command));
 }
 
 QDoubleSpinBox* PropertiesForm::GetSpinBox(float init_val, bool neg, const std::string& suffix)
 {
+    /* Returns a UI spin box */
     auto spin_box = new QDoubleSpinBox(this);
     spin_box->setSuffix(QString::fromStdString(suffix));
     spin_box->setMaximum(100000);
@@ -40,6 +42,7 @@ QDoubleSpinBox* PropertiesForm::GetSpinBox(float init_val, bool neg, const std::
 
 QLabel* PropertiesForm::GetLabel(const QString& text, int font_size)
 {
+    /* Returns Simple UI Labels */
     QLabel* label = new QLabel(this);
     label->setText(text);
     label->setStyleSheet(QString("font-size: %1pt;").arg(font_size));
@@ -48,6 +51,7 @@ QLabel* PropertiesForm::GetLabel(const QString& text, int font_size)
 
 QSlider* PropertiesForm::GetSlider(QBrush ival, int from, int to)
 {
+    /* Returns a horizonatal slider */
     int i = stoi(ival.color().name(QColor::HexArgb).toStdString().substr(1, 2), nullptr, 16);
     if(ival == Qt::NoBrush) i = 0;
     QSlider* slider = new QSlider(Qt::Horizontal, this);
@@ -58,6 +62,7 @@ QSlider* PropertiesForm::GetSlider(QBrush ival, int from, int to)
 
 QPushButton* PropertiesForm::GetColorButton(QColor icolor)
 {
+    /* Returns a UI button to select colors */
     QPushButton* button = new QPushButton(this);
     button->setToolTip("Pick color");
     button->setText("");
@@ -69,24 +74,27 @@ QPushButton* PropertiesForm::GetColorButton(QColor icolor)
 
 void PropertiesForm::AddXMLAction(Shape* shape, const XMLTag& old, const XMLTag& cur)
 {
+    /* Function to add an XML command onto the stack */
     this->scene_->AddAction(std::make_unique<ShapeXMLCommand>(
         shape, old, cur
     ));
 }
 
-void PropertiesForm::ImplSpinBoxChange(Shape* shape, QDoubleSpinBox* spinBox, const std::string& propName)
+void PropertiesForm::ImplSpinBoxChange(Shape* shape, QDoubleSpinBox* spin_box, const std::string& prop_name)
 {
-    connect(spinBox, &QDoubleSpinBox::editingFinished, this, [=]() {
+    /* Handles changes on a spin box corresponding to the XML attribute `prop_name` */
+    connect(spin_box, &QDoubleSpinBox::editingFinished, this, [=]() {
         if(this->block_signals) return;
-        float x = spinBox->value();
+        float x = spin_box->value();
         XMLTag old = shape->ToXML(), cur = old;
-        cur.properties[propName] = std::to_string(x);
+        cur.properties[prop_name] = std::to_string(x);
         this->AddXMLAction(shape, old, cur);
     });
 }
 
 void PropertiesForm::ImplFillColor(Shape* shape, QSlider* slider, QPushButton* button)
 {
+    /* Handles changing the fill color and opacity using the button and slider */
     connect(slider, &QSlider::sliderPressed, this, [=]() {
         this->start_slider_drag_state_ = shape->ToXML();
     });
@@ -121,6 +129,7 @@ void PropertiesForm::ImplFillColor(Shape* shape, QSlider* slider, QPushButton* b
 
 void PropertiesForm::ImplStrokeStyle(Shape* shape, QDoubleSpinBox* spinBox, QPushButton* button)
 {
+    /* Handle the stroke width and stroke color changes */
     this->ImplSpinBoxChange(shape, spinBox, "stroke-width");
     connect(button, &QPushButton::clicked, this, [=]() {
         QAbstractGraphicsShapeItem* qshape = dynamic_cast<QAbstractGraphicsShapeItem*>(shape);

@@ -8,20 +8,20 @@
 #include <string>
 
 
+/*
+Uses QGraphicsPolygonItem to render itself as a 2-sided polygon
+*/
 Line::Line(float x1, float y1, float x2, float y2)
     : QGraphicsPolygonItem(QPolygonF(QList<QPointF> {
         QPointF(x1, y1), QPointF(x2, y2)
     }))
-{
-    this->setFlags(QGraphicsItem::ItemSendsGeometryChanges);
-}
+{}
 
 
 Line::Line(const XMLTag& xml)
     : QGraphicsPolygonItem()
 {
     this->UpdateFromXML(xml);
-    this->setFlags(QGraphicsItem::ItemSendsGeometryChanges);
 }
 
 

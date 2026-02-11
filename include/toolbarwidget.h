@@ -19,7 +19,7 @@ public:
     ~ToolBarWidget();
 
 signals:
-    void ToolChanged(ToolType newTool);
+    void ToolChanged(ToolType newTool);  // Signal the GraphicsView object of a tool change
 
 private:
     QButtonGroup *button_group_;

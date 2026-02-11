@@ -21,11 +21,15 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     this->setWindowTitle("New File");
+    // Initialize the objects
     scene_ = new GraphicScene(this);
     doc_controller_ = new DocController(this);
     ui->graphicsView->setScene(scene_);
     doc_controller_->SetScene(scene_);
     ui->dockWidget->SetScene(scene_);
+    /*
+    Connect button; and keyboard shortcuts slots and signals for ui interactions
+    */
     // Delete Shape Action
     connect(ui->actionDelete_Selection, &QAction::triggered, scene_, &GraphicScene::DeleteSelectedItem);
     connect(ui->menuButtons->ui->pushButton_Delete, &QPushButton::clicked, ui->actionDelete_Selection, &QAction::trigger);

@@ -1,6 +1,10 @@
 #include "commands.h"
 #include <QtCore/qpoint.h>
 
+
+/*
+Command for moving shapes around
+*/
 MoveShapeCommand::MoveShapeCommand(QGraphicsItem* item, QPointF startPos, QPointF endPos)
     : item_(item), start_pos_(startPos), end_pos_(endPos)
 {

@@ -14,13 +14,13 @@ void Shape::AddStylesToXML(const QAbstractGraphicsShapeItem* item, XMLTag& xml)
 {
     std::string fill_color = item->brush().color().name(QColor::HexArgb).toStdString();
     if(item->brush() == Qt::NoBrush) {
-        fill_color = "#00000000";
+        fill_color = "#00000000";  // Translate no brush to opacity is zero
     }
     float opacity = std::stoi(fill_color.substr(1, 2), nullptr, 16) / 255.0;
     std::string stroke_color = item->pen().brush().color().name().toStdString();
     float stroke_width = item->pen().width();
     if(item->pen().style() == Qt::NoPen) {
-        stroke_width = 0;
+        stroke_width = 0;  // Translate no pen to zero stroke width
     }
     xml.properties["fill"] = "#" + fill_color.substr(3);
     xml.properties["stroke"] = stroke_color;

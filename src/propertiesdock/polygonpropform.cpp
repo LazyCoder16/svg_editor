@@ -61,6 +61,7 @@ PolygonPropForm::PolygonPropForm(QWidget* parent, GraphicScene* scene, Polygon* 
 
 void PolygonPropForm::ImplRadiusSlider(QSlider* slider, Polygon* polygon)
 {
+    // For re-sizing the polygon
     connect(slider, &QSlider::sliderPressed, this, [=]() {
         this->start_drag_state_ = polygon->ToXML();
     });

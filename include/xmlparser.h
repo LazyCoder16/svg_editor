@@ -6,6 +6,9 @@
 #include <vector>
 #include <iostream>
 
+/*
+Inteface to store XML tags in a tree like data structure
+*/
 struct XMLTag
 {
     bool is_text;
@@ -24,6 +27,6 @@ struct XMLParser
     static bool ParseFile(const std::string& content, XMLTag& root);
 };
 
-std::ostream& operator<<(std::ostream& os, const XMLTag& tag);
+std::ostream& operator<<(std::ostream& os, const XMLTag& tag);  // To output it to standard std streams such as cout and stringstream
 
 #endif // XMLPARSER_H

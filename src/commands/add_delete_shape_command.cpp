@@ -1,7 +1,9 @@
 #include "commands.h"
 #include "graphicscene.h"
 
-
+/*
+Calls the helper functions defined in GraphicsScene to add and delete shapes from the scene
+*/
 AddDeleteShapeCommand::AddDeleteShapeCommand(std::vector<QAbstractGraphicsShapeItem*> items, GraphicScene *scene, bool added)
     : items_(items), scene_(scene), added_(added)
 {

@@ -11,15 +11,12 @@
 
 Circle::Circle(float cx, float cy, float rad)
     : QGraphicsEllipseItem(cx-rad, cy-rad, rad*2, rad*2)
-{
-    this->setFlags(QGraphicsItem::ItemSendsGeometryChanges);
-}
+{}
 
 Circle::Circle(const XMLTag& xml)
     : QGraphicsEllipseItem()
 {
     UpdateFromXML(xml);
-    this->setFlags(QGraphicsItem::ItemSendsGeometryChanges);
 }
 
 void Circle::UpdateFromXML(const XMLTag& xml)

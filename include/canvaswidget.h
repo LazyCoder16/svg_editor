@@ -4,6 +4,9 @@
 #include <QGraphicsView>
 #include <QPointF>
 
+/*
+Inherits from QGraphicsView and displays the scene
+*/
 class CanvasWidget : public QGraphicsView
 {
     Q_OBJECT
@@ -11,16 +14,13 @@ public:
     CanvasWidget(QWidget *parent = nullptr);
 
 public slots:
-    void CentreOn(float x, float y);
+    void CentreOn(float x, float y); // Centre on screen on x and y coordinates of the scene
 
 signals:
-    void MousePosition(int x, int y);
+    void MousePosition(int x, int y); // Send the current mouse coordinates 
 
 protected:
-    //void mousePressEvent(QMouseEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
-    //void mouseReleaseEvent(QMouseEvent* event) override;
-
 private:
     QPointF top_left_;
 };

@@ -38,7 +38,7 @@ GraphicScene::GraphicScene(QWidget* parent)
         {
             selected_shapes.push_back(static_cast<QAbstractGraphicsShapeItem*>(item));
         }
-        emit SelectedShapesChanged(selected_shapes);
+        emit SelectedShapesChanged(selected_shapes);  // emit the signal
     });
 }
 
@@ -61,6 +61,7 @@ void GraphicScene::AddShape(std::unique_ptr<QAbstractGraphicsShapeItem> shape)
 void GraphicScene::SetToolType(ToolType tool)
 {
     this->cur_tool_ = tool;
+    // Item is selectable and movable if the current tool is Select
     bool flag = (cur_tool_ == ToolType::Select);
     for(auto shape : this->shapes_)
     {
@@ -114,7 +115,8 @@ void GraphicScene::DeleteSelectedItem()
 
 void GraphicScene::RemoveAllItems()
 {
-    undo_stack_.Reset();
+    // Delete all items
+    undo_stack_.Reset();  // Reset the stack
     for(auto shape : shapes_) 
     {
         this->removeItem(shape);
@@ -130,9 +132,10 @@ Mouse events from drawing new shape
 void GraphicScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     // Make a new unique_ptr and give its ownership to the scene after creating it
-    // ghostItem pointer will store the object location
+    // ghost_item pointer will store the object location
     std::unique_ptr<QAbstractGraphicsShapeItem> ghost_guard;
     if(event->button() == Qt::LeftButton && cur_tool_ != ToolType::Select) {
+        // Drawing a new shape
         start_draw_point_ = event->scenePos();
         for(const auto shape : shapes_)
         {
@@ -155,6 +158,7 @@ void GraphicScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
             ghost_guard = std::make_unique<FreehandPath>(QPainterPath(start_draw_point_));
         }
         else if(cur_tool_ == ToolType::Text) {
+            // Draw a dummy rectangle if the tool is text
             ghost_guard = std::make_unique<Rectangle>(start_draw_point_.x(), start_draw_point_.y(), 0, 0);
             ghost_guard->setPen(QPen(Qt::PenStyle::DotLine));
         }
@@ -163,6 +167,7 @@ void GraphicScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
     }
     if(event->button() == Qt::LeftButton && cur_tool_ == ToolType::Select)
     {
+        // Moving shape
         QGraphicsItem* item = this->itemAt(event->scenePos(), QTransform());
         if(item) 
         {
@@ -179,7 +184,7 @@ void GraphicScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
         QPointF cur_point = event->scenePos();
         dynamic_cast<Shape*>(ghost_item_)->UpdateShapeOnDraw(start_draw_point_, cur_point);
     }
-    QGraphicsScene::mouseMoveEvent(event);
+    QGraphicsScene::mouseMoveEvent(event);  // Handles the shape moving
 }
 
 void GraphicScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
@@ -197,6 +202,7 @@ void GraphicScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
             this->addItem(text_shape.release());
         }
         this->shapes_.insert(ghost_item_);
+        // Add this action onto the undo stack
         undo_stack_.AddAction(std::make_unique<AddDeleteShapeCommand>(
             std::vector<QAbstractGraphicsShapeItem*>{ghost_item_}, this, true
         ));
@@ -206,6 +212,7 @@ void GraphicScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         ghost_item_ = nullptr;
     }
     else if(event->button() == Qt::LeftButton && cur_tool_ == ToolType::Select && drag_started_) {
+        // Item has finished moving from its original position
         QGraphicsItem* item = this->itemAt(event->scenePos(), QTransform());
         if(item && item->pos() != start_drag_pos_) {
             undo_stack_.AddAction(std::make_unique<MoveShapeCommand>(
@@ -222,6 +229,7 @@ Clipboard Actions
 */
 void GraphicScene::CopyAction()
 {
+    // Convert selected items to xml format and store the text in qclipboard
     auto selected_items = this->selectedItems();
     if(!selected_items.empty())
     {
@@ -240,12 +248,15 @@ void GraphicScene::CopyAction()
 
 void GraphicScene::CutAction()
 {
+    // First copy the selected shapes then delete them from the scene
+    // DeleteSelectedItems adds its action to the undo stack by default
     this->CopyAction();
     this->DeleteSelectedItem();
 }
 
 void GraphicScene::PasteAction()
 {
+    // Add the shapes in the clipboard to the scene after converting from xml format
     std::string clipboard_text = QGuiApplication::clipboard()->text().toStdString();
     if(!clipboard_text.empty())
     {
@@ -261,6 +272,7 @@ void GraphicScene::PasteAction()
         for(int i=0; i<shapes.size(); ++i)
         {
             shapes[i]->setPos(20, 20);
+            // Pasted items are selected by default
             shapes[i]->setFlag(QGraphicsItem::ItemIsSelectable, true);
             shapes[i]->setFlag(QGraphicsItem::ItemIsMovable, true);
             shapes[i]->setSelected(true);

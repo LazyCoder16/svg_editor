@@ -30,14 +30,15 @@ bool DocController::DiscardChangesDialog()
 {
     // Returns true if the file operation can continue; false if the user clicks cancel
     // Called during open file, new file and close application operations
-    if(scene_->IsSaved()) return true; // All changes are saved
+    if(scene_->IsSaved()) return true; // All changes are saved no need to call
     auto reply = QMessageBox::warning(nullptr, 
                                     "Unsaved changes",
                                     "The document has been modifies.\nDo you want to save your changes?",
                                     QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-    if(reply == QMessageBox::Cancel) return false;
+    if(reply == QMessageBox::Cancel) return false;  // User cancelled his operation
     if(reply == QMessageBox::Save) {
         if(cur_filename_.empty()) {
+            // Not working on any file
             auto filename = OpenSaveDialog();
             if(!filename.empty()) SaveToFile(filename);
         }
@@ -56,6 +57,7 @@ Main slots
 void DocController::OpenFile()
 {
     if(!DiscardChangesDialog()) return;
+    // Get the file and its contents
     QString filename = QFileDialog::getOpenFileName(
         nullptr, tr("Open File"), QString(), tr("SVG File (*.svg)"));
     if(filename.isNull()) return;
@@ -66,25 +68,25 @@ void DocController::OpenFile()
         return;
     }
     QString content = QTextStream(&file).readAll();
-    qDebug() << content << "\n";
+    // Parse the content
     XMLTag root(false);
     XMLParser::ParseFile(content.toStdString(), root);
-    std::cout << root << "\n";
-    this->cur_filename_ = filename.toStdString();
+    this->cur_filename_ = filename.toStdString();  // Set current filename
 
-    scene_->RemoveAllItems();
+    scene_->RemoveAllItems();  // Reset the scene and set the viewport dimensions
     if(root.properties.find("width") != root.properties.end() 
         && root.properties.find("height") != root.properties.end())
     {
         scene_->SetViewportRect(std::stof(root.properties.at("width")), std::stof(root.properties.at("height")));
     }
+    // Extract shape pointers from the XML tag
     std::vector<std::unique_ptr<QAbstractGraphicsShapeItem> > shapes;
     ExtractShapes(root, shapes);
     for(int i=0; i<shapes.size(); ++i) 
     {
         shapes[i]->setFlag(QGraphicsItem::ItemIsSelectable, true);
         shapes[i]->setFlag(QGraphicsItem::ItemIsMovable, true);
-        scene_->AddShape(std::move(shapes[i]));
+        scene_->AddShape(std::move(shapes[i]));  // Give ownership to the scene
     }
 }
 
@@ -100,7 +102,7 @@ void DocController::NewFile()
 
 void DocController::SaveFile()
 {
-    if(cur_filename_.empty()) {
+    if(cur_filename_.empty()) { // Check if we are already working on a file
         cur_filename_ = OpenSaveDialog();
     }
     if(!cur_filename_.empty()) {
@@ -108,6 +110,7 @@ void DocController::SaveFile()
             this->scene_->SetSaved();
         }
         else {
+            // Save operation failed
             cur_filename_.clear();
         }
     }
@@ -129,6 +132,7 @@ Helper for the main slots
 */
 bool DocController::SaveToFile(const std::string& filename) 
 {
+    // Returns true if operation was successful
     QFile file(QString::fromStdString(filename));
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QMessageBox::warning(nullptr, "Error", 
@@ -153,6 +157,7 @@ std::string DocController::OpenSaveDialog()
 
 void DocController::ExtractShapes(const XMLTag& root, std::vector<std::unique_ptr<QAbstractGraphicsShapeItem> >& shapes)
 {
+    // Recursively looks for the shapes supported by the app
     if(root.is_text) return;
 
     if(root.name == "rect") {
@@ -178,6 +183,7 @@ void DocController::ExtractShapes(const XMLTag& root, std::vector<std::unique_pt
 
 XMLTag DocController::SceneToXML()
 {
+    // Converts the scene into xml format and returns the xml tag
     XMLTag root(false);
     root.name = "svg";
     root.properties["height"] = std::to_string(scene_->GetViewPortRect()->rect().height());

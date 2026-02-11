@@ -137,3 +137,4 @@ The `toolbarwidget.h` implements the ui class for the right-side toolbar. It sen
 The `PropertyDock` renders ways for the user to edit the object styles and resize them. It catches signals from graphics scene to know which shape is currently selected and signals from undo stack to know that the change requested from the form is executed.
 All the button clicks and keyboard shortcuts are mapped to their respective slots in the `MainWindow` constructor. It also maps some other ui signals and slots.
 **User Note**: Please use the *Select* tool in order to move and select shapes around the canvas.
+![Screenshot](images/screenshot.jpeg)

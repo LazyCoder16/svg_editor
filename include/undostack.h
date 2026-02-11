@@ -16,17 +16,17 @@ signals:
     void StackChanged();
 public:
     UndoStack();
-    void AddAction(std::unique_ptr<Command> command);
-    void Reset();
-    void Undo();
-    void Redo();
-    bool IsClean();
-    void SetClean();
+    void AddAction(std::unique_ptr<Command> command);  // New action
+    void Reset();  // Reset stacks
+    void Undo();  // Undo action
+    void Redo();  // Redo action
+    bool IsClean();  // (counter == 0) denotes if any change has been made
+    void SetClean();  // Resets counter to 0
 
 private:
     std::stack<std::unique_ptr<Command> > undo_stack_;
     std::stack<std::unique_ptr<Command> > redo_stack_;
-    int counter_;
+    int counter_;   // Counter to monitor changes
 };
 
 #endif // UNDOSTACK_H

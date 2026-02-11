@@ -16,6 +16,7 @@
 
 std::vector<std::string> SplitString(const std::string& s, char del)
 {
+    /* Helper function to split a string given a char delimeter */
     std::string buffer;
     std::vector<std::string> v;
     for(char ch : s)
@@ -36,6 +37,7 @@ std::vector<std::string> SplitString(const std::string& s, char del)
 
 std::string PointToStr(const QList<QPointF>& points)
 {
+    /* Converts a list of points back to svg strings */
     std::string s;
     for(QPointF point : points)
     {
@@ -47,15 +49,12 @@ std::string PointToStr(const QList<QPointF>& points)
 
 Polygon::Polygon(const std::vector<QPointF>& points)
     : QGraphicsPolygonItem(QList<QPointF>(points.begin(), points.end()))
-{
-    this->setFlags(QGraphicsItem::ItemSendsGeometryChanges);
-}
+{}
 
 Polygon::Polygon(const XMLTag& xml)
     : QGraphicsPolygonItem()
 {
     this->UpdateFromXML(xml);
-    this->setFlags(QGraphicsItem::ItemSendsGeometryChanges);
 }
 
 void Polygon::UpdateFromXML(const XMLTag& xml)
@@ -63,6 +62,7 @@ void Polygon::UpdateFromXML(const XMLTag& xml)
     std::vector<QPointF> points;
     std::stringstream ss(xml.properties.at("points"));
     std::string s;
+    // Parse string to extract the polygon points
     while(ss >> s)
     {
         const auto& v1 = SplitString(s, ',');
@@ -84,6 +84,7 @@ XMLTag Polygon::ToXML() const
 
 void Polygon::UpdateShapeOnDraw(QPointF start, QPointF cur)
 {
+    // Basic trigonometry to calculate the positions of the new points based on the current mouse position
     float r = QLineF(start, cur).length();
     float phi = std::atan2(cur.y()-start.y(), cur.x()-start.x());
     float theta = M_PI / 3;
@@ -123,6 +124,7 @@ float Polygon::GetRadius()
 
 void Polygon::SetRadius(float newRadius)
 {
+    /* Called for re-sizing the polygon */
     float cur_radius = this->GetRadius();
     float scale = newRadius / cur_radius;
     auto centroid = this->GetCentroid();

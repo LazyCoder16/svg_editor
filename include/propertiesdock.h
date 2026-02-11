@@ -26,7 +26,10 @@
 #include <QSlider>
 #include <QPushButton>
 
-
+/*
+Base class from which RectPropForm, CirclePropForm, etc. inherit
+Defines some helper functions which its child classes utilize.
+*/
 class PropertiesForm : public QWidget
 {
     Q_OBJECT;
@@ -50,6 +53,9 @@ private:
 };
 
 
+/*
+Renders the property form based on the currently selected shapes
+*/
 class PropertiesDock : public QDockWidget
 {
     Q_OBJECT;
@@ -58,7 +64,7 @@ public:
     void SetScene(GraphicScene *scene);
 
 public slots:
-    void SetSelectedShapes(const std::vector<QAbstractGraphicsShapeItem*>& shapes);
+    void SetSelectedShapes(const std::vector<QAbstractGraphicsShapeItem*>& shapes);  // Catches the signal from graphics scene object
 
 private:
     std::vector<QAbstractGraphicsShapeItem*> selected_shapes_;
@@ -67,6 +73,10 @@ private:
 };
 
 
+/*
+Property forms for each type of selection
+No selection defaults to viewport
+*/
 class ViewportPropForm : public PropertiesForm
 {
     Q_OBJECT;

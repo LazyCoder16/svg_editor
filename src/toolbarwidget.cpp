@@ -35,12 +35,13 @@ ToolBarWidget::ToolBarWidget(QWidget *parent)
     }
     button_group_->setExclusive(true);
 
+    // Emit signal whever a tool is changed
     connect(button_group_, &QButtonGroup::idToggled, this, [=](int id, bool checked) {
         if(checked) {
             emit ToolChanged((ToolType)id);
         }
     });
-    ui->pushButton_Select->setChecked(true);
+    ui->pushButton_Select->setChecked(true);  // Select button is checked true by default
 }
 
 ToolBarWidget::~ToolBarWidget()

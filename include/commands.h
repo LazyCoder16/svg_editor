@@ -57,7 +57,9 @@ private:
     QPointF end_pos_;
 };
 
-
+/*
+Command for changing the width and height of the viewport rectangle
+*/
 class ViewportChangeCommand : public Command
 {
 public:
@@ -70,7 +72,9 @@ private:
     float ow_, oh_, w_, h_;
 };
 
-
+/*
+Command to edit properties of a shape through XML serialization
+*/
 class ShapeXMLCommand : public Command
 {
 public:

@@ -40,6 +40,7 @@ bool XMLParser::ParseFile(const std::string &content, XMLTag &root)
     size_t len = content.size();
 
     // Assumes tag names and attribute name only contain lower case alphabets and hypens as typical of SVG xml files.
+    // Use a state machine to know what we are currently processing
     while(pos < len && !st.empty()) {
         switch(state)
         {
@@ -173,6 +174,7 @@ bool XMLParser::ParseFile(const std::string &content, XMLTag &root)
 
 std::ostream& operator<<(std::ostream& os, const XMLTag& tag)
 {
+    // Outputs the current xml tag recursively to a standard output stream
     if(tag.is_text)
     {
         os << tag.name << "\n";

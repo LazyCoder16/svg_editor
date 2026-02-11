@@ -14,6 +14,8 @@
 
 
 QPainterPath ParseSVGPath(const std::string& d) {
+    // Parses the svg attribute "d" supports only M and L instructions
+    // Also supports the short notation M x1 y1 x2 y2 x3 y3... common in freehand tools
     QPainterPath path;
     std::stringstream ss(d);
     char command = 'M';
@@ -43,15 +45,12 @@ QPainterPath ParseSVGPath(const std::string& d) {
 
 FreehandPath::FreehandPath(const QPainterPath& path)
     : QGraphicsPathItem(path)
-{
-    this->setFlags(QGraphicsItem::ItemSendsGeometryChanges);
-}
+{}
 
 FreehandPath::FreehandPath(const XMLTag& xml)
     : QGraphicsPathItem()
 {
     this->UpdateFromXML(xml);
-    this->setFlags(QGraphicsItem::ItemSendsGeometryChanges);
 }
 
 void FreehandPath::UpdateFromXML(const XMLTag& xml)
@@ -66,6 +65,7 @@ XMLTag FreehandPath::ToXML() const
     xml.name = "path";
     QPolygonF polygon = this->path().toFillPolygon();
     std::string xml_path;
+    // Convert path back to SVG format
     for(QPointF point : polygon)
     {
         if(xml_path.empty())

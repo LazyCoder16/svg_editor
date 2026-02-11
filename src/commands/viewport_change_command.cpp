@@ -2,6 +2,9 @@
 #include <QtWidgets/qgraphicsitem.h>
 
 
+/*
+Change viewport rectangle's height and width
+*/
 ViewportChangeCommand::ViewportChangeCommand(QGraphicsRectItem* viewport, float ow, float oh, float w, float h)
     : viewport_(viewport), ow_(ow), oh_(oh), w_(w), h_(h)
 {

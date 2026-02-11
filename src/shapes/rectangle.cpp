@@ -12,17 +12,13 @@
 
 Rectangle::Rectangle(float x, float y, float w, float h)
     : QGraphicsRectItem(x, y, w, h)
-{
-    // Use convenient functions Qt provides which will be useful in editting part with mouse events
-    this->setFlags(QGraphicsItem::ItemSendsGeometryChanges);
-}
+{}
 
 
 Rectangle::Rectangle(const XMLTag& xml)
     : QGraphicsRectItem()
 {
     this->UpdateFromXML(xml);
-    this->setFlags(QGraphicsItem::ItemSendsGeometryChanges);
 }
 
 void Rectangle::UpdateFromXML(const XMLTag& xml)
@@ -60,9 +56,11 @@ XMLTag Rectangle::ToXML() const
 
 void Rectangle::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
+    // Must overload to render the rounded corners as rounded rectangle item is not provided by qt
     painter->setBrush(brush());
     painter->setPen(pen());
     painter->drawRoundedRect(rect(), rx, ry);
+    // Render a thick red dotted outline if it is selected
     if(this->isSelected()) {
         painter->setBrush(Qt::NoBrush);
         painter->setPen(QPen(QBrush(Qt::red), 2, Qt::DotLine));

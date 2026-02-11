@@ -13,6 +13,12 @@
 #include <vector>
 
 
+/*
+Handles all the shape pointers and owns the UndoStack
+Also implements the mouse events to draw and move shapes
+Note that only an object of type GraphicsScene owns the pointers. 
+Other object only have the address to those pointers and never call delete
+*/
 class GraphicScene : public QGraphicsScene
 {
     Q_OBJECT
@@ -31,8 +37,8 @@ public:
     UndoStack* GetUndoStack() { return &undo_stack_; }
 
 signals:
-    void CentreCanvasOn(float x, float y);
-    void SelectedShapesChanged(const std::vector<QAbstractGraphicsShapeItem*>& selectedShapes);
+    void CentreCanvasOn(float x, float y);   // Signals the canvas widget to change its centre
+    void SelectedShapesChanged(const std::vector<QAbstractGraphicsShapeItem*>& selectedShapes);   // Signals the property dock that the selected shape has changed
 
 public slots:
     void SetViewportRect(float w, float h);
@@ -48,15 +54,16 @@ public slots:
     void PasteAction();
 
 protected:
+    /* Mouse Events */
     void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
 
 private:
     QGraphicsRectItem *viewport_rect_;
-    QAbstractGraphicsShapeItem *ghost_item_;
-    std::set<QAbstractGraphicsShapeItem*> shapes_;
-    std::map<QAbstractGraphicsShapeItem*, std::unique_ptr<QAbstractGraphicsShapeItem> > deleted_shapes_; 
+    QAbstractGraphicsShapeItem *ghost_item_;   // Stores the item currently being drawn; added the shape_ after the mouse click is released
+    std::set<QAbstractGraphicsShapeItem*> shapes_;   // Stores the shapes currently active on the canvas
+    std::map<QAbstractGraphicsShapeItem*, std::unique_ptr<QAbstractGraphicsShapeItem> > deleted_shapes_;    // Inactive shapes
     ToolType cur_tool_;
     bool draw_shape_started_ = false;
     bool drag_started_ = false;
