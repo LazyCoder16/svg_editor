@@ -74,4 +74,5 @@ bool UndoStack::IsClean() {
 void UndoStack::SetClean() {
     // Resets the counter
     counter_ = 0;
+    emit StackChanged();
 }
